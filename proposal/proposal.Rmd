@@ -38,7 +38,8 @@ Animals: Did it include animals? Did an animal — either real or computer-gener
 use_Sex: Did it use sex to sell its product? We counted any subtle or overt 
 suggestions of sex, sexuality, sex appeal or nudity.
  
-Other variables in the dataset include the commercial’s brand, title, thumbnail, description, year, poster channel’s name, Youtube ID, Youtube etag, Youtube URL,
+Other variables in the dataset include the commercial’s brand, title, thumbnail,
+description, year, poster channel’s name, Youtube ID, Youtube etag, Youtube URL,
 and audience engagement metrics (likes, dislikes, comments, favourites).  
 
 
