@@ -1,6 +1,6 @@
 Project proposal
 ================
-megaddon
+Megaddon: Yihan Shi, Holly Cui, Raffay Rana
 
 ``` r
 library(tidyverse)

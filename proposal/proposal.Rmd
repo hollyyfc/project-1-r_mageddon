@@ -1,6 +1,6 @@
 ---
 title: "Project proposal"
-author: "megaddon"
+author: "Megaddon: Yihan Shi, Holly Cui, Raffay Rana"
 output: github_document
 ---
 
