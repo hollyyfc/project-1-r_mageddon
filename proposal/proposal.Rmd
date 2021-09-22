@@ -80,7 +80,7 @@ of the ads over the years.
  
 
 Answering the second question will involve a series of visualizations. After filtering our
-data for just election years, we will create word clouds for ad titles and ad captions
+data for just election years, we will create word clouds for ad `title` and ad `description`
 to see if there are any particular words that appear more frequently then others. 
 We will complement this by adding a bar graph to show the count of the most prominent
 characteristics of these ads. Then, we will repeat the process for non-election years and 

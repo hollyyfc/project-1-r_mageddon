@@ -85,11 +85,11 @@ the years.
 
 Answering the second question will involve a series of visualizations.
 After filtering our data for just election years, we will create word
-clouds for ad titles and ad captions to see if there are any particular
-words that appear more frequently then others. We will complement this
-by adding a bar graph to show the count of the most prominent
-characteristics of these ads. Then, we will repeat the process for
-non-election years and compare our results to note any differences. We
-also intend on either creating new variables or summarizing existing
+clouds for ad `title` and ad `description` to see if there are any
+particular words that appear more frequently then others. We will
+complement this by adding a bar graph to show the count of the most
+prominent characteristics of these ads. Then, we will repeat the process
+for non-election years and compare our results to note any differences.
+We also intend on either creating new variables or summarizing existing
 variables to account for the fact that there are more non-election years
 than election years in the dataset.
