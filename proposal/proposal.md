@@ -42,20 +42,22 @@ overt suggestions of sex, sexuality, sex appeal or nudity.
 Other variables in the dataset include the commercial’s brand, title,
 thumbnail, description, year, poster channel’s name, Youtube ID, Youtube
 etag, Youtube URL, and audience engagement metrics (likes, dislikes,
-comments, favourites). In total, the `youtube` dataset had 247 rows and
+comments, favourites). In total, the `youtube` dataset has 247 rows and
 25 columns.
 
 ## Motivation
 
-We chose this dataset because Super Bowl commercials are often a unique
-and interesting topic to explore. More specifically, we are interested
-in digging into the several logical variables and how they might be
-influencing the views and likes of the ads. Then, we are also interested
-in looking at how this relation may have changed over the years and
-whether there is some relation between certain years and the kinds of
-ads made in those years. The variables in the dataset are also clean and
+We chose this dataset because Super Bowl commercials are an important
+cultural marker in the US and exploring their content and engagement can
+potentially reveal some interesting insights. More specifically, we are
+interested in digging into the dataset’s several boolean content
+variables and how they influence the views and likes of the ads. Then,
+we also want  
+look at how this relation has changed over the years and whether there
+is any trend between certain years and the kinds of ads made in those
+years. Lastly, the variables in the dataset are also clean and
 convenient to be pulled and used, which allows us to delve directly into
-data visualization.
+data visualization and analysis.
 
 ## Questions
 
@@ -72,15 +74,16 @@ To answer the first question, we will make a time series plot with
 can either be done by creating a binary time series plot and then
 faceting by characteristics or by wrangling the data such that for each
 year we have a column that has all the characteristics of the ad from
-that year. This will give us an idea of how the characteristic makeup of
-the ads has changed over time. It would then be interesting to look at
-how the `like_count`, `dislike_count`, and `view_count` changed over the
-years and whether there was any relation between ad characteristic and
-audience engagement. We also intend on creating new variables such as
-`like/view` and `dislike/view` to account for different viewership of
-the ads over the years.
+that year, which can then be used as a label for the plot. This will
+give us an idea of how the characteristic makeup of the ads has changed
+over time. It would then be interesting to look at how the `like_count`,
+`dislike_count`, and `view_count` changed over the years and whether
+there was any relation between ad characteristic and audience
+engagement. We also intend on creating new variables such as `like/view`
+and `dislike/view` to account for different total views of the ads over
+the years.
 
-Answering the second question will involve multiple visualizations.
+Answering the second question will involve a series of visualizations.
 After filtering our data for just election years, we will create word
 clouds for ad titles and ad captions to see if there are any particular
 words that appear more frequently then others. We will complement this
