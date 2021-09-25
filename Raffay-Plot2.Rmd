@@ -1,0 +1,85 @@
+---
+title: "Raffay Plot 2"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(wordcloud)
+library(RColorBrewer)
+library(tm)
+
+knitr::opts_chunk$set(echo = TRUE)
+youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
+
+election_year <- c(2000,2004,2008,2012,2016,2020)
+youtube <- youtube %>% 
+  mutate(election_years = ifelse(year %in% election_year,1,0)) 
+
+test <- youtube %>% 
+          filter(election_years == 1) %>% 
+          select(title)
+
+docs <- Corpus(VectorSource(test))
+docs
+docs <- docs %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+docs <- tm_map(docs, removeWords, c("super","bowl","commercial","superbowl",
+                                    "bud","light","budweiser"))
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix),decreasing=TRUE) 
+df <- data.frame(word = names(words),freq=words)
+
+set.seed(1234) # for reproducibility 
+wordcloud(words = df$word, 
+          freq = df$freq,
+          min.freq = 1,
+          max.words=100, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          colors=brewer.pal(8, "Dark2"))
+
+
+
+
+```
+
+```{r}
+
+
+test2 <- youtube %>% 
+          filter(election_years == 0) %>% 
+          select(title)
+
+docs <- Corpus(VectorSource(test2))
+docs
+docs <- docs %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+docs <- tm_map(docs, removeWords, c("super","bowl","commercial","superbowl",
+                                    "bud","light","budweiser"))
+dtm <- TermDocumentMatrix(docs) 
+matrix <- as.matrix(dtm) 
+words <- sort(rowSums(matrix),decreasing=TRUE) 
+df <- data.frame(word = names(words),freq=words)
+
+set.seed(1234) # for reproducibility 
+wordcloud(words = df$word, 
+          freq = df$freq,
+          min.freq = 1,
+          max.words=200, 
+          random.order=FALSE, 
+          rot.per=0.35,
+          colors=brewer.pal(8, "Dark2"))
+
+
+```
+
