@@ -3,6 +3,8 @@ title: "Raffay Plot 2"
 output: html_document
 ---
 
+
+
 ```{r}
 library(tidyverse)
 library(wordcloud)
@@ -44,7 +46,9 @@ wordcloud(words = df$word,
           rot.per=0.35,
           colors=brewer.pal(8, "Dark2"))
 
-
+# Next Steps
+# Filter for Brand Names 
+# Make Frequency Charts for the attributes 
 
 
 ```
@@ -79,6 +83,10 @@ wordcloud(words = df$word,
           random.order=FALSE, 
           rot.per=0.35,
           colors=brewer.pal(8, "Dark2"))
+
+# Next Steps
+# Filter for Brand Names 
+# Make Frequency Charts for the attributes 
 
 
 ```
