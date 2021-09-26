@@ -31,7 +31,9 @@ docs <- docs %>%
 docs <- tm_map(docs, content_transformer(tolower))
 docs <- tm_map(docs, removeWords, stopwords("english"))
 docs <- tm_map(docs, removeWords, c("super","bowl","commercial","superbowl",
-                                    "bud","light","budweiser"))
+                                    "bud","light","budweiser","pepsi",
+                                    "hyundai","doritos","coke","cocacola",
+                                    "cola","coca","kia","toyota"))
 dtm <- TermDocumentMatrix(docs) 
 matrix <- as.matrix(dtm) 
 words <- sort(rowSums(matrix),decreasing=TRUE) 
@@ -67,9 +69,10 @@ docs <- docs %>%
   tm_map(removePunctuation) %>%
   tm_map(stripWhitespace)
 docs <- tm_map(docs, content_transformer(tolower))
-docs <- tm_map(docs, removeWords, stopwords("english"))
 docs <- tm_map(docs, removeWords, c("super","bowl","commercial","superbowl",
-                                    "bud","light","budweiser"))
+                                    "bud","light","budweiser","pepsi",
+                                    "hyundai","doritos","coke","cocacola",
+                                    "cola","coca","the"))
 dtm <- TermDocumentMatrix(docs) 
 matrix <- as.matrix(dtm) 
 words <- sort(rowSums(matrix),decreasing=TRUE) 
@@ -88,6 +91,19 @@ wordcloud(words = df$word,
 # Filter for Brand Names 
 # Make Frequency Charts for the attributes 
 
+
+```
+
+
+
+```{r}
+
+# Way to create summary table with column names 
+youtube %>% 
+  pivot_longer(cols = c(use_sex,funny,celebrity)) %>% 
+  filter(value == TRUE) %>% 
+  group_by(name) %>% 
+  summarise(n = n())
 
 ```
 
