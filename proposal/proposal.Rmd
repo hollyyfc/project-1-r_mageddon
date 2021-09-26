@@ -49,7 +49,7 @@ the `youtube` dataset has `r dim(youtube)[1]` rows and `r dim(youtube)[2]` colum
 We chose this dataset because Super Bowl commercials are an important cultural 
 marker in the US and exploring their content and engagement can potentially reveal some
 interesting insights. More specifically, we are interested in digging into the dataset's several 
-boolean content variables and how they influence the views and likes of the ads. Then, we also want  
+boolean content variables and how they are associated with views and likes of the ads. Then, we also want  
 look at how this relation has changed over the years and whether there is 
 any trend between certain years and the kinds of ads made in those years. 
 Lastly, the variables in the dataset are also clean and convenient to be pulled and used, 
