@@ -10,6 +10,7 @@ library(tidyverse)
 library(wordcloud)
 library(RColorBrewer)
 library(tm)
+library(wordcloud2)
 
 knitr::opts_chunk$set(echo = TRUE)
 youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
@@ -53,6 +54,28 @@ wordcloud(words = df$word,
 # Make Frequency Charts for the attributes 
 
 
+# Way to create summary table with column names 
+election_yr <- youtube %>% 
+  pivot_longer(cols = c(use_sex,funny,celebrity,patriotic,danger,animals)) %>% 
+  filter(election_years == 1) %>% 
+  filter(value == TRUE) %>% 
+  group_by(name) %>% 
+  summarise(n = n()) %>% 
+  mutate(perc = paste(round((n / sum(n))*100),"%",sep = ""))
+
+election_yr %>% 
+  ggplot(aes(y = name, x = n, fill = name)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = perc), nudge_x = 2) +
+  labs(
+    x = "Count",
+    y = "Ad Attribute",
+    title = "Count and Proportion of Ad by Attribute",
+    subtitle = "In Election Years"
+  ) +
+  theme_minimal()
+
+
 ```
 
 ```{r}
@@ -72,7 +95,7 @@ docs <- tm_map(docs, content_transformer(tolower))
 docs <- tm_map(docs, removeWords, c("super","bowl","commercial","superbowl",
                                     "bud","light","budweiser","pepsi",
                                     "hyundai","doritos","coke","cocacola",
-                                    "cola","coca","the"))
+                                    "cola","coca","the","kia"))
 dtm <- TermDocumentMatrix(docs) 
 matrix <- as.matrix(dtm) 
 words <- sort(rowSums(matrix),decreasing=TRUE) 
@@ -87,6 +110,8 @@ wordcloud(words = df$word,
           rot.per=0.35,
           colors=brewer.pal(8, "Dark2"))
 
+wordcloud2(data=df, size=1.6, color='random-dark')
+
 # Next Steps
 # Filter for Brand Names 
 # Make Frequency Charts for the attributes 
@@ -99,11 +124,27 @@ wordcloud(words = df$word,
 ```{r}
 
 # Way to create summary table with column names 
-youtube %>% 
-  pivot_longer(cols = c(use_sex,funny,celebrity)) %>% 
+# Way to create summary table with column names 
+no_election_yr <- youtube %>% 
+  pivot_longer(cols = c(use_sex,funny,celebrity,patriotic,danger,animals)) %>% 
+  filter(election_years == 0) %>% 
   filter(value == TRUE) %>% 
   group_by(name) %>% 
-  summarise(n = n())
+  summarise(n = n()) %>% 
+  mutate(perc = paste(round((n / sum(n))*100),"%",sep = "")) 
+
+no_election_yr %>% 
+  ggplot(aes(y = name, x = n, fill = name)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = perc), nudge_x = 3.5) +
+  labs(
+    x = "Count",
+    y = "Ad Attribute",
+    title = "Count and Proportion of Ad by Attribute",
+    subtitle = "In non-Election Years"
+  ) +
+  theme_minimal()
+ 
 
 ```
 
