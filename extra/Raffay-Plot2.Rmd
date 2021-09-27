@@ -165,7 +165,6 @@ no_election_yr %>%
 ```{r ggplot-wordcloud}
 
 library(ggwordcloud)
-
 df %>% 
   filter(freq >= 2) %>% 
   ggplot(aes(label = word, 
@@ -177,8 +176,8 @@ df %>%
   theme_minimal()
       
 
-  
 
+# Adjust size range, angle, and color
 
 ```
 
