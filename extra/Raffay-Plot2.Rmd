@@ -66,14 +66,17 @@ election_yr <- youtube %>%
 election_yr %>% 
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
-  geom_text(aes(label = perc), nudge_x = 2) +
+  geom_text(aes(label = perc, color = name), nudge_x = 2, show.legend = FALSE) +
   labs(
     x = "Count",
     y = "Ad Attribute",
     title = "Count and Proportion of Ad by Attribute",
     subtitle = "In Election Years"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  scale_fill_manual(values = c("Grey","Grey","Grey","Grey","Red","Grey")) +
+  scale_color_manual(values = c("Grey","Grey","Grey","Grey","Red","Grey"))
+ 
 
 
 ```
@@ -136,14 +139,16 @@ no_election_yr <- youtube %>%
 no_election_yr %>% 
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
-  geom_text(aes(label = perc), nudge_x = 3.5) +
+  geom_text(aes(label = perc, color = name), nudge_x = 3.5, show.legend = FALSE) +
   labs(
     x = "Count",
     y = "Ad Attribute",
     title = "Count and Proportion of Ad by Attribute",
-    subtitle = "In non-Election Years"
+    subtitle = "In Election Years"
   ) +
-  theme_minimal()
+  theme_minimal() +
+  scale_fill_manual(values = c("Grey","Grey","Grey","Grey","Red","Grey")) +
+  scale_color_manual(values = c("Grey","Grey","Grey","Grey","Red","Grey"))
  
 
 ```
