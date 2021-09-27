@@ -3,7 +3,15 @@ title: "Raffay Plot 2"
 output: html_document
 ---
 
+### Introduction
+Our second question aims to explore the difference, if any, between ads aired during election years compared to those aired during non-election years. Particularly, we want to analyze if there is any noticeable difference in the description and content between the election and non-election year ads. Answering this question involves looking at the `title` and `description` variables to analyze how these ads were described, and then analyzing the boolean content variables of `use_sex`, `patriotic`,`funny`,`celebrity`,`danger`, and `animals` to see if they had any noticeable differences in their content. Finally, the `year` variable is also needed to distinguish between election and non-election years. 
 
+We are interested in exploring this question because election years mark a significant cultural moment in the US. Therefore, we want to see whether this focus towards politics transfers to super bowl ads too. 
+
+
+### Approach 
+
+To analyze the description aspect of our question, we decided to use a word cloud visualization since we felt it was the most informative way to visualize what major descriptors are used for the ads. The alternative way of analyzing `title` and `description` that we considered included a bar char for top 10-20 words. However, we decided to opt for the word cloud since it provided more information (i.e number of words) and better captured the relative position of all the words being used (by size).
 
 ```{r}
 library(tidyverse)
@@ -152,4 +160,27 @@ no_election_yr %>%
  
 
 ```
+
+
+```{r ggplot-wordcloud}
+
+library(ggwordcloud)
+
+df %>% 
+  filter(freq >= 2) %>% 
+  ggplot(aes(label = word, 
+             color = factor(sample.int(10, 76, 
+                                       replace = TRUE)),
+             size = freq)) +
+  geom_text_wordcloud()+
+  scale_size_area(max_size = 10)
+  theme_minimal()
+      
+
+  
+
+
+```
+
+https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html
 
