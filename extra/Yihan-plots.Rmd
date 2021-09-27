@@ -2,7 +2,7 @@
 title: "Yihan-plots"
 author: "Yihan Shi"
 date: "9/27/2021"
-output: html_document
+output: github_document
 ---
 ### Introduction
 Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you’re interested in this question.
