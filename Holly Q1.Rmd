@@ -1,0 +1,116 @@
+---
+title: "Holly Q1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r load}
+library(tidyverse)
+library(lubridate)
+
+youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
+youtube1 <- youtube
+youtube1
+```
+
+
+```{r}
+
+youtube3 <- youtube1 %>%
+  drop_na(year, view_count) %>%
+  group_by(year) %>%
+  summarise(sum = sum(view_count))
+youtube3  
+
+ggplot(youtube3, aes(x = year, y = sum)) +
+  geom_col()
+
+# outlier in 2012? 
+# geom_col e
+
+
+```
+
+
+
+
+```{r pie-chart}
+# Find the total number of TRUE values in each Boolean variable
+funny_true_count = length(youtube1$funny[youtube1$funny == TRUE])
+showproduct_true_count = length(youtube1$show_product_quickly[youtube1$show_product_quickly == TRUE])
+patriotic_true_count = length(youtube1$patriotic[youtube1$patriotic == TRUE])
+celebrity_true_count = length(youtube1$celebrity[youtube1$celebrity == TRUE])
+danger_true_count = length(youtube1$danger[youtube1$danger == TRUE])
+animals_true_count = length(youtube1$animals[youtube1$animals == TRUE])
+use_sex_true_count = length(youtube1$use_sex[youtube1$use_sex == TRUE])
+# Make a new dataframe based on the elements
+youtube_pie_df <- tibble(
+  category = c("Funny", "Show product quickly", "Patriotic", "Celebrity", "Danger", "Animals", "Use sex"),
+  count = c(funny_true_count, showproduct_true_count, patriotic_true_count, celebrity_true_count, 
+            danger_true_count, animals_true_count, use_sex_true_count)
+)
+# Compute the position of labels on the pie chart
+youtube_pie_df <- youtube_pie_df %>% 
+  arrange(desc(category)) %>%
+  mutate(
+    ypos = cumsum(count)- 0.5*count, 
+    perc = count / sum(count) * 100, 
+    percentage = paste0(round(perc, digits = 1), "%") 
+    # create new variable regarding the proportion that each element takes up among total
+    ) 
+
+# Plot the chart
+ggplot(youtube_pie_df, aes(x="", y=count, fill=category)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void() +
+  geom_text(aes(y = ypos, label = percentage), color = "black", size=3.5) +
+  scale_fill_brewer(palette="Pastel2") +
+  labs(
+    title = "Count of use of the elements included in\nSuperbowl Commercials", 
+    fill = "Element include"
+  ) +
+  theme(
+   plot.title = element_text(face = "bold", size = 12, hjust = 0.5)
+  )
+```
+
+
+```{r}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
