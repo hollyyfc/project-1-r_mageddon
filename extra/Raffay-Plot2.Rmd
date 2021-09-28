@@ -14,6 +14,7 @@ library(tidytext)
 library(syuzhet)
 library(stringr)
 library(textdata)
+library(scales)
 ```
 
 ```{r reading-file}
@@ -23,14 +24,14 @@ youtube <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/ti
 
 
 ### Introduction
-Our second question aims to explore the difference, if any, between ads aired during election years compared to those aired during non-election years. Particularly, we want to analyze if there is any noticeable difference in the description and content between the election and non-election year ads. Answering this question involves looking at the `title` and `description` variables to analyze how these ads were described, and then analyzing the boolean content variables of `use_sex`, `patriotic`,`funny`,`celebrity`,`danger`, and `animals` to see if they had any noticeable differences in their content. Finally, the `year` variable is also needed to distinguish between election and non-election years. 
+Our second question aims to explore the difference, if any, between ads aired during election years compared to those aired during non-election years. Particularly, we want to analyze if there is any noticeable difference in the description and content between the election and non-election year ads. Answering this question involves looking at the `title` variable to analyze how these ads were described, and then analyzing the boolean content variables of `use_sex`, `patriotic`,`funny`,`celebrity`,`danger`, and `animals` to see if they had any noticeable differences in their content. Finally, the `year` variable is also needed to distinguish between election and non-election years.
 
-We are interested in exploring this question because election years mark a significant cultural moment in the US. Therefore, we want to see whether this focus on politics translates into any tangeible to super bowl ads too. 
+We are interested in exploring this question because election years mark a significant cultural moment in the US. Therefore, we want to see whether this focus on politics translates into any noticeable effect on super bowl ads. 
 
 
 ### Approach 
 
-To analyze the description aspect of our question, we decided to use a word cloud visualization since we felt it was the most informative way to visualize what major descriptors are used for the ads. The alternative way of analyzing `title` and `description` that we considered included a bar char for top 10-20 words. However, we decided to opt for the word cloud since it provided more information (i.e number of words) and better captured the relative position of all the words being used (by size).
+To analyze the description aspect of our question, we decided to use a word cloud visualization since we felt it was the most informative way to visualize what major descriptors are used for the ads. The alternative way of analyzing `title` that we considered included a bar char for top 10-20 words. However, we decided to opt for the word cloud since it provided more information in terms of relative occurrences of all the words being used (by size). Creating the word cloud involved cleaning the text (for e.g turning all words lower, removing punctuation, removing numbers) which was done by the `tm` library. We also performed sentiment analysis on the words using the `get_sentiment()` function and colored the word cloud based on the words' sentiment score. 
 
 To analyze the content aspect, we decided to opt for a column graph with percentage values of each content category as labels of the visualization. Possible alternative that we considered was a pie chart but since our column graph shows the percentage values as well as count values, we decided to go for the visualziation that maximized information. 
 
@@ -46,8 +47,7 @@ test <- youtube %>%
   filter(election_years == 1) %>%
   select(title)
 
-docs <- Corpus(VectorSource(test))
-docs
+docs <- VCorpus(VectorSource(test))
 docs <- docs %>%
   tm_map(removeNumbers) %>%
   tm_map(removePunctuation) %>%
@@ -64,15 +64,16 @@ dtm <- TermDocumentMatrix(docs)
 matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing = TRUE)
 election_df <- data.frame(word = names(words), freq = words)
-```
 
-``` {r election-wordcloud-viz}
 
 election_df <- election_df %>% 
   mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
-  mutate(sentiment = get_sentiment(word,"syuzhet")) %>% 
-  filter(freq > 1)
+   # Package to get sentiment scores for each word in the dataset
+  mutate(sentiment = get_sentiment(word,"syuzhet"))
 
+```
+
+``` {r election-wordcloud-viz}
 
 election_df %>%
   ggplot(aes(
@@ -82,9 +83,15 @@ election_df %>%
     angle = angle
   )) +
   geom_text_wordcloud() +
-  scale_radius(range = c(5, 15)) +
+  scale_radius(range = c(2, 15)) +
   theme_minimal() + 
-  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF") + 
+  labs(
+    title = "Election Year Ad Title Word Cloud",
+    subtitle = "Colored by Sentiment
+      Bluer for postive sentiments
+      Yellower for negative sentiment"
+  )
 
 ```
 
@@ -95,7 +102,7 @@ no_election_title <- youtube %>%
   select(title)
 
 # Data Wrangling steps
-docs <- Corpus(VectorSource(no_election_title))
+docs <- VCorpus(VectorSource(no_election_title))
 docs <- docs %>%
   # Removing numbers
   tm_map(removeNumbers) %>%
@@ -120,31 +127,17 @@ matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing = TRUE)
 non_election_df <- data.frame(word = names(words), freq = words)
 
-
-
-
-lookup_word <- function(word, dict = get_sentiment('syuzhet')) {
-  for (x in 1:nrow(dict)){
-    #if (word %in% dict$word){
-    #return(dict$sentiment[dict$word == word])}
-    if (str_detect(as.character(dict[x,1]),word)){
-      return(dict[x,2])
-    }
-  }
-  return("NA")
-}
-
-
-```
-
-
-``` {r creating-wordcloud}
-# Creating wordcloud
+# Adding the sentiment score variable 
 non_election_df <- non_election_df %>% 
   mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
   filter(freq >= 2) %>% 
   mutate(sentiment = get_sentiment(word,"syuzhet"))
 
+
+```
+
+
+``` {r non-election-wordcloud-viz}
 
 non_election_df %>% 
   ggplot(aes(
@@ -154,13 +147,18 @@ non_election_df %>%
     angle = angle
   )) +
   geom_text_wordcloud() +
-  scale_radius(range = c(5, 15)) +
+  scale_radius(range = c(3.5, 15)) +
   theme_minimal() + 
-  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")+
+  labs(
+    title = "Non-election Year Ad Title Word Cloud",
+    subtitle = "Colored by Sentiment
+      Bluer for postive sentiments
+      Yellower for negative sentiment") 
 ```
 
 
-Based on the two word clouds above, it is hard to analyze whether the words offer any 
+Based on the two word clouds above, 
 
 
 ``` {r election-col-plot}
@@ -174,6 +172,8 @@ election_yr <- youtube %>%
   summarise(n = n()) %>%
   mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
 
+
+# Creating the plot
 election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
@@ -184,9 +184,9 @@ election_yr %>%
     title = "Count and Proportion of Ad by Attribute",
     subtitle = "In Election Years"
   ) +
-  theme_minimal() 
-  # scale_fill_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey")) +
-  # scale_color_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey"))
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_minimal()
 ```
 
 
@@ -208,20 +208,30 @@ no_election_yr <- youtube %>%
 no_election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
-  geom_text(aes(label = perc, color = name), nudge_x = 3.5, show.legend = FALSE) +
+  geom_text(aes(label = perc, color = name), nudge_x = 4, show.legend = FALSE) +
   labs(
     x = "Count",
     y = "Ad Attribute",
     title = "Count and Proportion of Ad by Attribute",
     subtitle = "In Non-Election Years"
   ) +
-  theme_minimal() 
-  # scale_fill_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey")) +
-  # scale_color_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey"))
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_minimal()
 ```
 
 
 https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html
+
+
+
+
+
+### Discussion
+
+Based on our graphs above 
+
+
 
 
 ```{r}
