@@ -3,33 +3,48 @@ title: "Raffay Plot 2"
 output: html_document
 ---
 
+```{r loading-libraries}
+library(tidyverse)
+library(wordcloud)
+library(RColorBrewer)
+library(tm)
+library(wordcloud2)
+library(ggwordcloud)
+library(tidytext)
+library(syuzhet)
+library(stringr)
+library(textdata)
+```
+
+```{r reading-file}
+knitr::opts_chunk$set(echo = TRUE)
+youtube <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv", show_col_types = FALSE)
+```
+
+
 ### Introduction
 Our second question aims to explore the difference, if any, between ads aired during election years compared to those aired during non-election years. Particularly, we want to analyze if there is any noticeable difference in the description and content between the election and non-election year ads. Answering this question involves looking at the `title` and `description` variables to analyze how these ads were described, and then analyzing the boolean content variables of `use_sex`, `patriotic`,`funny`,`celebrity`,`danger`, and `animals` to see if they had any noticeable differences in their content. Finally, the `year` variable is also needed to distinguish between election and non-election years. 
 
-We are interested in exploring this question because election years mark a significant cultural moment in the US. Therefore, we want to see whether this focus towards politics transfers to super bowl ads too. 
+We are interested in exploring this question because election years mark a significant cultural moment in the US. Therefore, we want to see whether this focus on politics translates into any tangeible to super bowl ads too. 
 
 
 ### Approach 
 
 To analyze the description aspect of our question, we decided to use a word cloud visualization since we felt it was the most informative way to visualize what major descriptors are used for the ads. The alternative way of analyzing `title` and `description` that we considered included a bar char for top 10-20 words. However, we decided to opt for the word cloud since it provided more information (i.e number of words) and better captured the relative position of all the words being used (by size).
 
-```{r}
-library(tidyverse)
-library(wordcloud)
-library(RColorBrewer)
-library(tm)
-library(wordcloud2)
+To analyze the content aspect, we decided to opt for a column graph with percentage values of each content category as labels of the visualization. Possible alternative that we considered was a pie chart but since our column graph shows the percentage values as well as count values, we decided to go for the visualziation that maximized information. 
 
-knitr::opts_chunk$set(echo = TRUE)
-youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
 
-election_year <- c(2000,2004,2008,2012,2016,2020)
-youtube <- youtube %>% 
-  mutate(election_years = ifelse(year %in% election_year,1,0)) 
+``` {r data-prep-election-wordcloud}
+# Election years in the dataset
+election_year <- c(2000, 2004, 2008, 2012, 2016, 2020)
+# Adding an election year variable
+youtube <- youtube %>%
+  mutate(election_years = ifelse(year %in% election_year, 1, 0))
 
-test <- youtube %>% 
-          filter(election_years == 1) %>% 
-          select(title)
+test <- youtube %>%
+  filter(election_years == 1) %>%
+  select(title)
 
 docs <- Corpus(VectorSource(test))
 docs
@@ -39,39 +54,127 @@ docs <- docs %>%
   tm_map(stripWhitespace)
 docs <- tm_map(docs, content_transformer(tolower))
 docs <- tm_map(docs, removeWords, stopwords("english"))
-docs <- tm_map(docs, removeWords, c("super","bowl","commercial","superbowl",
-                                    "bud","light","budweiser","pepsi",
-                                    "hyundai","doritos","coke","cocacola",
-                                    "cola","coca","kia","toyota"))
-dtm <- TermDocumentMatrix(docs) 
-matrix <- as.matrix(dtm) 
-words <- sort(rowSums(matrix),decreasing=TRUE) 
-df <- data.frame(word = names(words),freq=words)
+docs <- tm_map(docs, removeWords, c(
+  "super", "bowl", "commercial", "superbowl",
+  "bud", "light", "budweiser", "pepsi",
+  "hyundai", "doritos", "coke", "cocacola",
+  "cola", "coca", "kia", "toyota"
+))
+dtm <- TermDocumentMatrix(docs)
+matrix <- as.matrix(dtm)
+words <- sort(rowSums(matrix), decreasing = TRUE)
+election_df <- data.frame(word = names(words), freq = words)
+```
 
-set.seed(1234) # for reproducibility 
-wordcloud(words = df$word, 
-          freq = df$freq,
-          min.freq = 1,
-          max.words=100, 
-          random.order=FALSE, 
-          rot.per=0.35,
-          colors=brewer.pal(8, "Dark2"))
+``` {r election-wordcloud-viz}
 
-# Next Steps
-# Filter for Brand Names 
-# Make Frequency Charts for the attributes 
+election_df <- election_df %>% 
+  mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
+  mutate(sentiment = get_sentiment(word,"syuzhet")) %>% 
+  filter(freq > 1)
 
 
-# Way to create summary table with column names 
-election_yr <- youtube %>% 
-  pivot_longer(cols = c(use_sex,funny,celebrity,patriotic,danger,animals)) %>% 
-  filter(election_years == 1) %>% 
-  filter(value == TRUE) %>% 
-  group_by(name) %>% 
-  summarise(n = n()) %>% 
-  mutate(perc = paste(round((n / sum(n))*100),"%",sep = ""))
+election_df %>%
+  ggplot(aes(
+    label = word,
+    color = sentiment,
+    size = freq,
+    angle = angle
+  )) +
+  geom_text_wordcloud() +
+  scale_radius(range = c(5, 15)) +
+  theme_minimal() + 
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
 
-election_yr %>% 
+```
+
+```{r non-election-wordcloud-data-prep}
+# Isolating the title variable
+no_election_title <- youtube %>%
+  filter(election_years == 0) %>%
+  select(title)
+
+# Data Wrangling steps
+docs <- Corpus(VectorSource(no_election_title))
+docs <- docs %>%
+  # Removing numbers
+  tm_map(removeNumbers) %>%
+  # Removing punctuation
+  tm_map(removePunctuation) %>%
+  # Removing whitespace
+  tm_map(stripWhitespace)
+
+# transforming words to lowercase
+docs <- tm_map(docs, content_transformer(tolower))
+# removing words that contain brand names
+docs <- tm_map(docs, removeWords, c(
+  "super", "bowl", "commercial", "superbowl",
+  "bud", "light", "budweiser", "pepsi",
+  "hyundai", "doritos", "coke", "cocacola",
+  "cola", "coca", "the", "kia","toyota"
+))
+
+# Creating df that can be used by ggwordcloud
+dtm <- TermDocumentMatrix(docs)
+matrix <- as.matrix(dtm)
+words <- sort(rowSums(matrix), decreasing = TRUE)
+non_election_df <- data.frame(word = names(words), freq = words)
+
+
+
+
+lookup_word <- function(word, dict = get_sentiment('syuzhet')) {
+  for (x in 1:nrow(dict)){
+    #if (word %in% dict$word){
+    #return(dict$sentiment[dict$word == word])}
+    if (str_detect(as.character(dict[x,1]),word)){
+      return(dict[x,2])
+    }
+  }
+  return("NA")
+}
+
+
+```
+
+
+``` {r creating-wordcloud}
+# Creating wordcloud
+non_election_df <- non_election_df %>% 
+  mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
+  filter(freq >= 2) %>% 
+  mutate(sentiment = get_sentiment(word,"syuzhet"))
+
+
+non_election_df %>% 
+  ggplot(aes(
+    label = word,
+    color = sentiment,
+    size = freq,
+    angle = angle
+  )) +
+  geom_text_wordcloud() +
+  scale_radius(range = c(5, 15)) +
+  theme_minimal() + 
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
+```
+
+
+Based on the two word clouds above, it is hard to analyze whether the words offer any 
+
+
+``` {r election-col-plot}
+# Creating variable with election, using pivot_longer to get attributes in the
+# same column, and creating a percentage variable
+election_yr <- youtube %>%
+  pivot_longer(cols = c(use_sex, funny, celebrity, patriotic, danger, animals)) %>%
+  filter(election_years == 1) %>%
+  filter(value == TRUE) %>%
+  group_by(name) %>%
+  summarise(n = n()) %>%
+  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
+
+election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
   geom_text(aes(label = perc, color = name), nudge_x = 2, show.legend = FALSE) +
@@ -81,70 +184,28 @@ election_yr %>%
     title = "Count and Proportion of Ad by Attribute",
     subtitle = "In Election Years"
   ) +
-  theme_minimal() +
-  scale_fill_manual(values = c("Grey","Grey","Grey","Grey","Red","Grey")) +
-  scale_color_manual(values = c("Grey","Grey","Grey","Grey","Red","Grey"))
- 
-
-
-```
-
-```{r}
-
-
-test2 <- youtube %>% 
-          filter(election_years == 0) %>% 
-          select(title)
-
-docs <- Corpus(VectorSource(test2))
-docs
-docs <- docs %>%
-  tm_map(removeNumbers) %>%
-  tm_map(removePunctuation) %>%
-  tm_map(stripWhitespace)
-docs <- tm_map(docs, content_transformer(tolower))
-docs <- tm_map(docs, removeWords, c("super","bowl","commercial","superbowl",
-                                    "bud","light","budweiser","pepsi",
-                                    "hyundai","doritos","coke","cocacola",
-                                    "cola","coca","the","kia"))
-dtm <- TermDocumentMatrix(docs) 
-matrix <- as.matrix(dtm) 
-words <- sort(rowSums(matrix),decreasing=TRUE) 
-df <- data.frame(word = names(words),freq=words)
-
-set.seed(1234) # for reproducibility 
-wordcloud(words = df$word, 
-          freq = df$freq,
-          min.freq = 1,
-          max.words=100, 
-          random.order=FALSE, 
-          rot.per=0.35,
-          colors=brewer.pal(8, "Dark2"))
-
-wordcloud2(data=df, size=1.6, color='random-dark')
-
-# Next Steps
-# Filter for Brand Names 
-# Make Frequency Charts for the attributes 
-
-
+  theme_minimal() 
+  # scale_fill_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey")) +
+  # scale_color_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey"))
 ```
 
 
 
-```{r}
 
-# Way to create summary table with column names 
-# Way to create summary table with column names 
-no_election_yr <- youtube %>% 
-  pivot_longer(cols = c(use_sex,funny,celebrity,patriotic,danger,animals)) %>% 
-  filter(election_years == 0) %>% 
-  filter(value == TRUE) %>% 
-  group_by(name) %>% 
-  summarise(n = n()) %>% 
-  mutate(perc = paste(round((n / sum(n))*100),"%",sep = "")) 
+```{r non-election-col-plot}
 
-no_election_yr %>% 
+# Creating variable with no election, using pivot_longer to get attributes in the
+# same column, and creating a percentage variable
+no_election_yr <- youtube %>%
+  pivot_longer(cols = c(use_sex, funny, celebrity, patriotic, danger, animals)) %>%
+  filter(election_years == 0) %>%
+  filter(value == TRUE) %>%
+  group_by(name) %>%
+  summarise(n = n()) %>%
+  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
+
+# No Election year col vizualization
+no_election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
   geom_text(aes(label = perc, color = name), nudge_x = 3.5, show.legend = FALSE) +
@@ -152,34 +213,41 @@ no_election_yr %>%
     x = "Count",
     y = "Ad Attribute",
     title = "Count and Proportion of Ad by Attribute",
-    subtitle = "In Election Years"
+    subtitle = "In Non-Election Years"
   ) +
-  theme_minimal() +
-  scale_fill_manual(values = c("Grey","Grey","Grey","Grey","Red","Grey")) +
-  scale_color_manual(values = c("Grey","Grey","Grey","Grey","Red","Grey"))
- 
-
+  theme_minimal() 
+  # scale_fill_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey")) +
+  # scale_color_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey"))
 ```
 
-
-```{r ggplot-wordcloud}
-
-library(ggwordcloud)
-df %>% 
-  filter(freq >= 2) %>% 
-  ggplot(aes(label = word, 
-             color = factor(sample.int(10, 76, 
-                                       replace = TRUE)),
-             size = freq)) +
-  geom_text_wordcloud()+
-  scale_size_area(max_size = 10)
-  theme_minimal()
-      
-
-
-# Adjust size range, angle, and color
-
-```
 
 https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html
 
+
+```{r}
+# Code for WordCloud2
+set.seed(1234) # for reproducibility
+wordcloud(
+  words = df$word,
+  freq = df$freq,
+  min.freq = 1,
+  max.words = 100,
+  random.order = FALSE,
+  rot.per = 0.35,
+  colors = brewer.pal(8, "Dark2")
+)
+
+wordcloud2(data = df, size = 1.6, color = "random-dark")
+
+set.seed(1234) # for reproducibility
+wordcloud(
+  words = df$word,
+  freq = df$freq,
+  min.freq = 1,
+  max.words = 100,
+  random.order = FALSE,
+  rot.per = 0.35,
+  colors = brewer.pal(8, "Dark2")
+)
+
+```
