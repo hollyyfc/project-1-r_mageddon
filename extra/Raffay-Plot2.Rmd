@@ -10,6 +10,10 @@ library(RColorBrewer)
 library(tm)
 library(wordcloud2)
 library(ggwordcloud)
+library(tidytext)
+library(syuzhet)
+library(stringr)
+library(textdata)
 ```
 
 ```{r reading-file}
@@ -63,23 +67,101 @@ election_df <- data.frame(word = names(words), freq = words)
 ```
 
 ``` {r election-wordcloud-viz}
-election_df %>%
-  # Random angles
+
+election_df <- election_df %>% 
   mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
+  mutate(sentiment = get_sentiment(word,"syuzhet")) %>% 
+  filter(freq > 1)
+
+
+election_df %>%
   ggplot(aes(
     label = word,
-    # Random colors 
-    color = factor(sample.int(10, 173,
-      replace = TRUE
-    )),
+    color = sentiment,
     size = freq,
     angle = angle
   )) +
   geom_text_wordcloud() +
-  scale_radius(range = c(3, 15)) +
-  theme_minimal()
+  scale_radius(range = c(5, 15)) +
+  theme_minimal() + 
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
 
 ```
+
+```{r non-election-wordcloud-data-prep}
+# Isolating the title variable
+no_election_title <- youtube %>%
+  filter(election_years == 0) %>%
+  select(title)
+
+# Data Wrangling steps
+docs <- Corpus(VectorSource(no_election_title))
+docs <- docs %>%
+  # Removing numbers
+  tm_map(removeNumbers) %>%
+  # Removing punctuation
+  tm_map(removePunctuation) %>%
+  # Removing whitespace
+  tm_map(stripWhitespace)
+
+# transforming words to lowercase
+docs <- tm_map(docs, content_transformer(tolower))
+# removing words that contain brand names
+docs <- tm_map(docs, removeWords, c(
+  "super", "bowl", "commercial", "superbowl",
+  "bud", "light", "budweiser", "pepsi",
+  "hyundai", "doritos", "coke", "cocacola",
+  "cola", "coca", "the", "kia","toyota"
+))
+
+# Creating df that can be used by ggwordcloud
+dtm <- TermDocumentMatrix(docs)
+matrix <- as.matrix(dtm)
+words <- sort(rowSums(matrix), decreasing = TRUE)
+non_election_df <- data.frame(word = names(words), freq = words)
+
+
+
+
+lookup_word <- function(word, dict = get_sentiment('syuzhet')) {
+  for (x in 1:nrow(dict)){
+    #if (word %in% dict$word){
+    #return(dict$sentiment[dict$word == word])}
+    if (str_detect(as.character(dict[x,1]),word)){
+      return(dict[x,2])
+    }
+  }
+  return("NA")
+}
+
+
+```
+
+
+``` {r creating-wordcloud}
+# Creating wordcloud
+non_election_df <- non_election_df %>% 
+  mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
+  filter(freq >= 2) %>% 
+  mutate(sentiment = get_sentiment(word,"syuzhet"))
+
+
+non_election_df %>% 
+  ggplot(aes(
+    label = word,
+    color = sentiment,
+    size = freq,
+    angle = angle
+  )) +
+  geom_text_wordcloud() +
+  scale_radius(range = c(5, 15)) +
+  theme_minimal() + 
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
+```
+
+
+Based on the two word clouds above, it is hard to analyze whether the words offer any 
+
 
 ``` {r election-col-plot}
 # Creating variable with election, using pivot_longer to get attributes in the
@@ -107,58 +189,6 @@ election_yr %>%
   # scale_color_manual(values = c("Grey", "Grey", "Grey", "Grey", "Red", "Grey"))
 ```
 
-```{r non-election-wordcloud-data-prep}
-# Isolating the title variable
-no_election_title <- youtube %>%
-  filter(election_years == 0) %>%
-  select(title)
-
-# Data Wrangling steps
-docs <- Corpus(VectorSource(no_election_title))
-docs <- docs %>%
-  # Removing numbers
-  tm_map(removeNumbers) %>%
-  # Removing punctuation
-  tm_map(removePunctuation) %>%
-  # Removing whitespace
-  tm_map(stripWhitespace)
-
-# transforming words to lowercase
-docs <- tm_map(docs, content_transformer(tolower))
-# removing words that contain brand names
-docs <- tm_map(docs, removeWords, c(
-  "super", "bowl", "commercial", "superbowl",
-  "bud", "light", "budweiser", "pepsi",
-  "hyundai", "doritos", "coke", "cocacola",
-  "cola", "coca", "the", "kia"
-))
-
-# Creating df that can be used by ggwordcloud
-dtm <- TermDocumentMatrix(docs)
-matrix <- as.matrix(dtm)
-words <- sort(rowSums(matrix), decreasing = TRUE)
-non_election_df <- data.frame(word = names(words), freq = words)
-
-```
-
-
-``` {r creating-wordcloud}
-# Creating wordcloud
-non_election_df %>%
-  mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
-  filter(freq >= 2) %>%
-  ggplot(aes(
-    label = word,
-    color = factor(sample.int(10, 76,
-      replace = TRUE
-    )),
-    size = freq,
-    angle = angle
-  )) +
-  geom_text_wordcloud() +
-  scale_radius(range = c(5, 15)) +
-  theme_minimal()
-```
 
 
 
