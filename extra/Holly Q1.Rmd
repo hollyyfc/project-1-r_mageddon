@@ -1,0 +1,158 @@
+---
+title: "Holly-Plot1"
+author: "Holly Cui"
+date: "9/27/2021"
+output: github_document
+---
+### Introduction
+Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you’re interested in this question.
+
+### Approach 
+Describe what types of plots you are going to make to address your question. For each plot, provide a clear explanation as to why this plot (e.g. boxplot, barplot, histogram, etc.) is best for providing the information you are asking about. The two plots should be of different types, and at least one of the two plots needs to use either color mapping or facets.
+
+
+```{r load libraries}
+library(tidyverse)
+library(lubridate)
+
+youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
+youtube1 <- youtube
+youtube1
+```
+
+
+```{r TIME-SERIES-PLOT}
+# wrangle data grouped by year
+youtube2 <- youtube1 %>%
+  drop_na(year, view_count, like_count, dislike_count) %>%
+  group_by(year) %>%
+  summarise(sum_view = sum(view_count), sum_like = sum(like_count), sum_dislike = sum(dislike_count))
+youtube2
+
+# ratio: `like/view` and `dislike/view`
+youtube3 <- youtube2 %>%
+  mutate(
+    like_view_rate = sum_like/sum_view, 
+    dislike_view_rate = sum_dislike/sum_view
+  )
+youtube3
+
+# Initial thought: a pure geom_line plot with view-count vs. year
+ggplot(youtube3, aes(x = year, y = sum_view)) +
+  geom_line() + 
+  labs(
+    title = "sum_view"
+  )
+# However, from the plot, we saw point for 2012 has extremely higher value than points for other years. 
+# This reminds us to take like_count and dislike_count into account and average on the total view count to see if the "outlier" can be balanced. 
+
+# Plot ratio plot
+ggplot(youtube3, aes(x = year)) +
+  geom_line(aes(y = like_view_rate)) +
+  labs(
+    title = "like/view ratio"
+  )
+ggplot(youtube3, aes(x = year)) +
+  geom_line(aes(y = dislike_view_rate), color = "red") +
+  labs(
+    title = "dislike/view ratio"
+  )
+# From the two lines (the reason why they are not put on the same plot is because of different scale of y axis), 
+# we can see the outlier has been balanced. The pattern is different, which should be taken into account. 
+
+# The final plot: 
+ggplot(data = youtube3, aes(x = year, y = sum_view)) +
+  geom_line(aes(size = like_view_rate), color = "blue") +
+  stat_smooth(
+  color = "red", fill = "grey",
+  linetype = "dashed",
+  method = "loess"
+  ) +
+  labs(
+    y = "Total number of view",
+    title = "Total number of view of Superbowl commercials over years",
+    subtitle = "with like/view rate as weight on size",
+    size = "like / view"
+  )
+# The final plot takes into account three different aspects: the sum_view over years, sum of like count averaged on total view count, and the regression smoothed line with confidence interval. 
+
+```
+
+
+
+
+```{r PIE-CHART}
+# Find the total number of TRUE values in each Boolean variable
+funny_true_count = length(youtube1$funny[youtube1$funny == TRUE])
+showproduct_true_count = length(youtube1$show_product_quickly[youtube1$show_product_quickly == TRUE])
+patriotic_true_count = length(youtube1$patriotic[youtube1$patriotic == TRUE])
+celebrity_true_count = length(youtube1$celebrity[youtube1$celebrity == TRUE])
+danger_true_count = length(youtube1$danger[youtube1$danger == TRUE])
+animals_true_count = length(youtube1$animals[youtube1$animals == TRUE])
+use_sex_true_count = length(youtube1$use_sex[youtube1$use_sex == TRUE])
+# Make a new dataframe based on the elements
+youtube_pie_df <- tibble(
+  category = c("Funny", "Show product quickly", "Patriotic", "Celebrity", "Danger", "Animals", "Use sex"),
+  count = c(funny_true_count, showproduct_true_count, patriotic_true_count, celebrity_true_count, 
+            danger_true_count, animals_true_count, use_sex_true_count)
+)
+# Compute the position of labels on the pie chart
+youtube_pie_df <- youtube_pie_df %>% 
+  arrange(desc(category)) %>%
+  mutate(
+    ypos = cumsum(count)- 0.5*count, 
+    perc = count / sum(count) * 100, 
+    percentage = paste0(round(perc, digits = 1), "%") 
+    # create new variable regarding the proportion that each element takes up among total
+    ) 
+
+# Plot the chart
+ggplot(youtube_pie_df, aes(x="", y=count, fill=category)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  theme_void() +
+  geom_text(aes(y = ypos, label = percentage), color = "black", size=3.5) +
+  scale_fill_brewer(palette="Pastel2") +
+  labs(
+    title = "Count of use of the elements included in\nSuperbowl Commercials", 
+    fill = "Element include"
+  ) +
+  theme(
+   plot.title = element_text(face = "bold", size = 12, hjust = 0.5)
+  )
+```
+
+### Analysis
+provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. 
+
+### Discussion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
