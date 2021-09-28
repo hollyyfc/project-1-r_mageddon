@@ -50,11 +50,6 @@ percentage_table <- tribble(
 percentage_table
 ```
 
-```{r plotting_percentage_overall}
-ggplot(percentage_table, aes(x = category, y = percentage)) + 
-  geom_col() + 
-  scale_colour_brewer(palette = "Pastel1")
-```
 
 ```{r wrangling_function}
 # create compare for different categories
@@ -62,11 +57,11 @@ ggplot(percentage_table, aes(x = category, y = percentage)) +
 create_compare <- function(varname, full_data) {
   full_data <- full_data %>% 
     drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
-    mutate(avg_like = like_count / view_count,
-           avg_dislike = dislike_count / view_count,
-           avg_engage = comment_count / view_count,
+    mutate(like = like_count / view_count,
+           dislike = dislike_count / view_count,
+           engage = comment_count / view_count,
            feature = as_label(enquo(varname))) %>% 
-    select({{varname}}, avg_like, avg_dislike, avg_engage, feature, year) %>%
+    select({{varname}}, like, dislike, engage, feature, year) %>%
     rename(val = as_label(enquo(varname)))
   return(full_data)
 }
@@ -85,13 +80,13 @@ all_compare <- rbind(create_compare(funny, youtube),
 
 
 ```{r plotting compare}
-like_plot <- ggplot(all_compare, aes(x = avg_like, y = feature, color = val)) +
+like_plot <- ggplot(all_compare, aes(x = like, y = feature, color = val)) +
   geom_boxplot()
 
-dislike_plot <- ggplot(all_compare, aes(x = avg_dislike, y = feature, color = val)) +
+dislike_plot <- ggplot(all_compare, aes(x = dislike, y = feature, color = val)) +
   geom_boxplot()
 
-engage_plot <- ggplot(all_compare, aes(x = avg_engage, y = feature, color = val)) +
+engage_plot <- ggplot(all_compare, aes(x = engage, y = feature, color = val)) +
   geom_boxplot()
 
 like_plot
@@ -99,55 +94,31 @@ dislike_plot
 engage_plot
 ```
 
-```{r funny-by-year}
-funny_over_years <- all_compare %>% 
-  filter(feature == 'funny') %>% 
-  group_by(year, val) %>% 
-  summarise(mean_like = mean(avg_like))
 
-ggplot(funny_over_years, aes(x = year, y = mean_like, group = val)) + 
-  geom_line(aes(color = val))
-
-
-animals_over_years <- all_compare %>% 
-  filter(feature == 'animals') %>% 
-  group_by(year, val) %>% 
-  summarise(mean_like = mean(avg_like))
-
-ggplot(animals_over_years, aes(x = year, y = mean_like, group = val)) + 
-  geom_line(aes(color = val))
-
-use_sex_over_years <- all_compare %>% 
-  filter(feature == 'use_sex') %>% 
-  group_by(year, val) %>% 
-  summarise(mean_like = mean(avg_like))
-
-ggplot(use_sex_over_years, aes(x = year, y = mean_like, group = val)) + 
-  geom_line(aes(color = val))
-
-patriotic_over_years <- all_compare %>% 
-  filter(feature == 'patriotic') %>% 
-  group_by(year, val) %>% 
-  summarise(mean_like = mean(avg_like))
-
-ggplot(patriotic_over_years, aes(x = year, y = mean_like, group = val)) + 
-  geom_line(aes(color = val))
-```
 
 ```{r}
-year_compare <- all_compare %>% 
-  filter(val == TRUE) %>% 
-  group_by(year, val, feature) %>% 
-  summarise(mean_like = mean(avg_like))
+feature_over_years <- all_compare %>% 
+  group_by(year, feature, val) %>% 
+  summarise(mean_like = mean(like),
+            mean_engage = mean(engage))
 
-ggplot(year_compare, aes(x = year, y = mean_like)) + 
-  geom_line() + 
-  facet_grid(feature ~ .)
+ggplot(feature_over_years, aes(x = year, y = mean_like)) + 
+  geom_line(aes(color = val)) + 
+  facet_wrap(feature ~ .)
+
+ggplot(feature_over_years, aes(x = year, y = mean_engage)) + 
+  geom_line(aes(color = val)) + 
+  facet_wrap(feature ~ .)
 ```
+
 
 
 ### Analysis
 provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. 
 
 ### Discussion
-
+The year variable used here denotes the Superbowl year where the commercial was 
+shown. However, some commercials have a different published date on Youtube.
+Furthermore, the youtube videos have been collected from random Youtube users 
+instead of influncers or offial commercial accounts. Therefore, the views, likes,
+and engagement also depend on the account itself.
