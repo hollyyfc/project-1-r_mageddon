@@ -1,6 +1,8 @@
 ---
 title: "Raffay Plot 2"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r loading-libraries}
@@ -229,35 +231,9 @@ https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html
 
 ### Discussion
 
-Based on our graphs above 
+We can divide the discussion of our visualizations into two parts: comparison by description and comparison by content. 
 
+When comparing our two words clouds, it immediately becomes clear that there is some overlap in the words used in Superbowl Ad titles. These include, winner, new, and nfl. Similarly, there does not seem to be any major difference in the overall sentiment makeup of these words. We can gauge this by observing that both the word clouds have a few blue words (indicating positive sentiment), very few yellow words (indicating negative sentiment), and majority brown words (indicating neutral sentiment). This goes on to indicate that there is very little difference in the titles of superbowl ads in election years compared to non-election years. This result was surprising since our team was expecting the election titles to contain more patriotic words such as "America", "Freedom", and "Liberty" but it appears as if the ad titles are not significantly affected by election and non-election years. 
 
+We observed a similar relation when analyzing the content of election and non-election year ads. For both these categories, there seemed to be a marginal difference in the attribute makeup, indicating that even the content of ads was very similar in election and non-election years. However, it was interesting to note that `use_sex` attribute dropped from 14% in non-election years to 9% in election years. While this could be indicative of a slight variation in content, it more more likely that this change was a coincidence.  
 
-
-```{r}
-# Code for WordCloud2
-set.seed(1234) # for reproducibility
-wordcloud(
-  words = df$word,
-  freq = df$freq,
-  min.freq = 1,
-  max.words = 100,
-  random.order = FALSE,
-  rot.per = 0.35,
-  colors = brewer.pal(8, "Dark2")
-)
-
-wordcloud2(data = df, size = 1.6, color = "random-dark")
-
-set.seed(1234) # for reproducibility
-wordcloud(
-  words = df$word,
-  freq = df$freq,
-  min.freq = 1,
-  max.words = 100,
-  random.order = FALSE,
-  rot.per = 0.35,
-  colors = brewer.pal(8, "Dark2")
-)
-
-```
