@@ -22,9 +22,6 @@ mapping or facets.
 library(tidyverse)
 ```
 
-    ## Warning in system("timedatectl", intern = TRUE): running command 'timedatectl'
-    ## had status 1
-
     ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
 
     ## ✓ ggplot2 3.3.5     ✓ purrr   0.3.4
@@ -131,7 +128,7 @@ create_compare <- function(varname, full_data) {
            avg_dislike = dislike_count / view_count,
            avg_engage = comment_count / view_count,
            feature = as_label(enquo(varname))) %>% 
-    select({{varname}}, avg_like, avg_dislike, avg_engage, feature) %>%
+    select({{varname}}, avg_like, avg_dislike, avg_engage, feature, year) %>%
     rename(val = as_label(enquo(varname)))
   return(full_data)
 }
@@ -175,6 +172,87 @@ engage_plot
 ```
 
 ![](Yihan-plots_files/figure-gfm/plotting%20compare-3.png)<!-- -->
+
+``` r
+funny_over_years <- all_compare %>% 
+  filter(feature == 'funny') %>% 
+  group_by(year, val) %>% 
+  summarise(mean_like = mean(avg_like))
+```
+
+    ## `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
+
+``` r
+ggplot(funny_over_years, aes(x = year, y = mean_like, group = val)) + 
+  geom_line(aes(color = val))
+```
+
+![](Yihan-plots_files/figure-gfm/funny-by-year-1.png)<!-- -->
+
+``` r
+animals_over_years <- all_compare %>% 
+  filter(feature == 'animals') %>% 
+  group_by(year, val) %>% 
+  summarise(mean_like = mean(avg_like))
+```
+
+    ## `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
+
+``` r
+ggplot(animals_over_years, aes(x = year, y = mean_like, group = val)) + 
+  geom_line(aes(color = val))
+```
+
+![](Yihan-plots_files/figure-gfm/funny-by-year-2.png)<!-- -->
+
+``` r
+use_sex_over_years <- all_compare %>% 
+  filter(feature == 'use_sex') %>% 
+  group_by(year, val) %>% 
+  summarise(mean_like = mean(avg_like))
+```
+
+    ## `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
+
+``` r
+ggplot(use_sex_over_years, aes(x = year, y = mean_like, group = val)) + 
+  geom_line(aes(color = val))
+```
+
+![](Yihan-plots_files/figure-gfm/funny-by-year-3.png)<!-- -->
+
+``` r
+patriotic_over_years <- all_compare %>% 
+  filter(feature == 'patriotic') %>% 
+  group_by(year, val) %>% 
+  summarise(mean_like = mean(avg_like))
+```
+
+    ## `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
+
+``` r
+ggplot(patriotic_over_years, aes(x = year, y = mean_like, group = val)) + 
+  geom_line(aes(color = val))
+```
+
+![](Yihan-plots_files/figure-gfm/funny-by-year-4.png)<!-- -->
+
+``` r
+year_compare <- all_compare %>% 
+  filter(val == TRUE) %>% 
+  group_by(year, val, feature) %>% 
+  summarise(mean_like = mean(avg_like))
+```
+
+    ## `summarise()` has grouped output by 'year', 'val'. You can override using the `.groups` argument.
+
+``` r
+ggplot(year_compare, aes(x = year, y = mean_like)) + 
+  geom_line() + 
+  facet_grid(feature ~ .)
+```
+
+![](Yihan-plots_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ### Analysis
 

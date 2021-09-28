@@ -66,7 +66,7 @@ create_compare <- function(varname, full_data) {
            avg_dislike = dislike_count / view_count,
            avg_engage = comment_count / view_count,
            feature = as_label(enquo(varname))) %>% 
-    select({{varname}}, avg_like, avg_dislike, avg_engage, feature) %>%
+    select({{varname}}, avg_like, avg_dislike, avg_engage, feature, year) %>%
     rename(val = as_label(enquo(varname)))
   return(full_data)
 }
@@ -98,6 +98,53 @@ like_plot
 dislike_plot
 engage_plot
 ```
+
+```{r funny-by-year}
+funny_over_years <- all_compare %>% 
+  filter(feature == 'funny') %>% 
+  group_by(year, val) %>% 
+  summarise(mean_like = mean(avg_like))
+
+ggplot(funny_over_years, aes(x = year, y = mean_like, group = val)) + 
+  geom_line(aes(color = val))
+
+
+animals_over_years <- all_compare %>% 
+  filter(feature == 'animals') %>% 
+  group_by(year, val) %>% 
+  summarise(mean_like = mean(avg_like))
+
+ggplot(animals_over_years, aes(x = year, y = mean_like, group = val)) + 
+  geom_line(aes(color = val))
+
+use_sex_over_years <- all_compare %>% 
+  filter(feature == 'use_sex') %>% 
+  group_by(year, val) %>% 
+  summarise(mean_like = mean(avg_like))
+
+ggplot(use_sex_over_years, aes(x = year, y = mean_like, group = val)) + 
+  geom_line(aes(color = val))
+
+patriotic_over_years <- all_compare %>% 
+  filter(feature == 'patriotic') %>% 
+  group_by(year, val) %>% 
+  summarise(mean_like = mean(avg_like))
+
+ggplot(patriotic_over_years, aes(x = year, y = mean_like, group = val)) + 
+  geom_line(aes(color = val))
+```
+
+```{r}
+year_compare <- all_compare %>% 
+  filter(val == TRUE) %>% 
+  group_by(year, val, feature) %>% 
+  summarise(mean_like = mean(avg_like))
+
+ggplot(year_compare, aes(x = year, y = mean_like)) + 
+  geom_line() + 
+  facet_grid(feature ~ .)
+```
+
 
 ### Analysis
 provide the code that generates your plots. Use scale functions to provide nice axis labels and guides. 
