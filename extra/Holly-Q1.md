@@ -1,7 +1,7 @@
 Holly-Plot1
 ================
 Holly Cui
-9/27/2021
+9/29/2021
 
 ### Introduction
 
@@ -21,9 +21,6 @@ mapping or facets.
 ``` r
 library(tidyverse)
 ```
-
-    ## Warning in system("timedatectl", intern = TRUE): running command 'timedatectl'
-    ## had status 1
 
     ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
 
@@ -48,30 +45,130 @@ library(lubridate)
     ##     date, intersect, setdiff, union
 
 ``` r
-youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
-youtube1 <- youtube
-youtube1
+library(dplyr)
+library(ggrepel)
+library(viridis)
 ```
 
-    ## # A tibble: 247 × 25
-    ##     year brand     superbowl_ads_d… youtube_url funny show_product_qu… patriotic
-    ##    <dbl> <chr>     <chr>            <chr>       <lgl> <lgl>            <lgl>    
-    ##  1  2018 Toyota    https://superbo… https://ww… FALSE FALSE            FALSE    
-    ##  2  2020 Bud Light https://superbo… https://ww… TRUE  TRUE             FALSE    
-    ##  3  2006 Bud Light https://superbo… https://ww… TRUE  FALSE            FALSE    
-    ##  4  2018 Hynudai   https://superbo… https://ww… FALSE TRUE             FALSE    
-    ##  5  2003 Bud Light https://superbo… https://ww… TRUE  TRUE             FALSE    
-    ##  6  2020 Toyota    https://superbo… https://ww… TRUE  TRUE             FALSE    
-    ##  7  2020 Coca-Cola https://superbo… https://ww… TRUE  FALSE            FALSE    
-    ##  8  2020 Kia       https://superbo… https://ww… FALSE FALSE            FALSE    
-    ##  9  2020 Hynudai   https://superbo… https://ww… TRUE  TRUE             FALSE    
-    ## 10  2020 Budweiser https://superbo… https://ww… FALSE TRUE             TRUE     
-    ## # … with 237 more rows, and 18 more variables: celebrity <lgl>, danger <lgl>,
-    ## #   animals <lgl>, use_sex <lgl>, id <chr>, kind <chr>, etag <chr>,
-    ## #   view_count <dbl>, like_count <dbl>, dislike_count <dbl>,
-    ## #   favorite_count <dbl>, comment_count <dbl>, published_at <dttm>,
-    ## #   title <chr>, description <chr>, thumbnail <chr>, channel_title <chr>,
-    ## #   category_id <dbl>
+    ## Loading required package: viridisLite
+
+``` r
+library(hrbrthemes)
+```
+
+    ## NOTE: Either Arial Narrow or Roboto Condensed fonts are required to use these themes.
+
+    ##       Please use hrbrthemes::import_roboto_condensed() to install Roboto Condensed and
+
+    ##       if Arial Narrow is not on your system, please see https://bit.ly/arialnarrow
+
+``` r
+youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
+youtube1 <- youtube
+```
+
+``` r
+# First, create a function that returns total count of a specific feature in one year.
+count_feature_number <- function(data, feature_name, desired_year){
+  count1 = 0
+  for (i in seq(1, nrow(data))){
+    if (data$year[i] == desired_year){
+      if (data[i, feature_name] == TRUE){
+        count1 = count1 + 1
+      }
+    }
+  }
+  return(count1)
+}
+
+
+# With help from the counter above, we define a new function that creates a 
+## generalized feature counting dataframe for a single year.
+generator <- function(data, year){
+  funny_count = count_feature_number(data, "funny", year) 
+  show_quickly_count = count_feature_number(data, "show_product_quickly", year)
+  patriotic_count = count_feature_number(data, "patriotic", year)
+  celebrity_count = count_feature_number(data, "celebrity", year)
+  danger_count = count_feature_number(data, "danger", year)
+  animals_count = count_feature_number(data, "animals", year)
+  use_sex_count = count_feature_number(data, "use_sex", year)
+  
+  year_value <- rep(year, 7)
+  count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
+                        celebrity_count, danger_count, animals_count, use_sex_count)
+  features <- c("funny", "show_product_quickly", "patriotic", 
+                "celebrity", "danger", "animals", "use_sex")
+  year_table <- cbind(year_value, count_of_feature, features)
+  year_df <- as.data.frame(year_table)
+  return(year_df)
+}
+
+
+# Then, using the "appender" function below to get the final dataframe for 
+## all years from 2000 to 2020. 
+appender <- function(data){
+  year_general_df <- generator(data, 2000)
+  for (j in seq(2001, 2020)){
+    year_general_df <- rbind(year_general_df, 
+                             generator(data, j))
+  }
+  return(year_general_df)
+}
+
+
+# Use the function and get our desired plot
+year_feature_df <- appender(youtube1)
+
+year_feature <- year_feature_df %>%
+  mutate(
+    year_value = as.numeric(as.character(year_value)),
+    count_of_feature = as.numeric(as.character(count_of_feature))
+  ) %>%
+  group_by(year_value, features) %>%
+  summarise(n = sum(count_of_feature)) %>%
+  mutate(percentage = n / sum(n))
+```
+
+    ## `summarise()` has grouped output by 'year_value'. You can override using the `.groups` argument.
+
+``` r
+year_feature
+```
+
+    ## # A tibble: 147 × 4
+    ## # Groups:   year_value [21]
+    ##    year_value features                 n percentage
+    ##         <dbl> <fct>                <dbl>      <dbl>
+    ##  1       2000 animals                  4     0.182 
+    ##  2       2000 celebrity                0     0     
+    ##  3       2000 danger                   4     0.182 
+    ##  4       2000 funny                    8     0.364 
+    ##  5       2000 patriotic                0     0     
+    ##  6       2000 show_product_quickly     5     0.227 
+    ##  7       2000 use_sex                  1     0.0455
+    ##  8       2001 animals                  3     0.0882
+    ##  9       2001 celebrity                6     0.176 
+    ## 10       2001 danger                   4     0.118 
+    ## # … with 137 more rows
+
+``` r
+# Plot stacked area chart
+ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
+    geom_area(alpha=0.6 , size=.5, colour="white") +
+    labs(
+      x = "Year", 
+      y = "Percentage", 
+      fill = "Features",
+      title = "Percentage comparison among video features in\nSuperbowl commercials over years (2000~2020)",
+      subtitle = "By video features"
+    ) + 
+    theme_ipsum() +
+    theme(
+      plot.title = element_text(hjust = 0, size = 13)
+    )
+```
+
+![](Holly-Q1_files/figure-gfm/STACKED-BAR-CHART-1.png)<!-- -->
 
 ``` r
 # wrangle data grouped by year

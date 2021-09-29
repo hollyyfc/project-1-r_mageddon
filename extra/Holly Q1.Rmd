@@ -1,7 +1,7 @@
 ---
 title: "Holly-Plot1"
 author: "Holly Cui"
-date: "9/27/2021"
+date: "9/29/2021"
 output: github_document
 ---
 ### Introduction
@@ -14,10 +14,96 @@ Describe what types of plots you are going to make to address your question. For
 ```{r load libraries}
 library(tidyverse)
 library(lubridate)
+library(dplyr)
+library(ggrepel)
+library(viridis)
+library(hrbrthemes)
 
 youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
 youtube1 <- youtube
-youtube1
+```
+
+
+```{r STACKED-BAR-CHART}
+# First, create a function that returns total count of a specific feature in one year.
+count_feature_number <- function(data, feature_name, desired_year){
+  count1 = 0
+  for (i in seq(1, nrow(data))){
+    if (data$year[i] == desired_year){
+      if (data[i, feature_name] == TRUE){
+        count1 = count1 + 1
+      }
+    }
+  }
+  return(count1)
+}
+
+
+# With help from the counter above, we define a new function that creates a 
+## generalized feature counting dataframe for a single year.
+generator <- function(data, year){
+  funny_count = count_feature_number(data, "funny", year) 
+  show_quickly_count = count_feature_number(data, "show_product_quickly", year)
+  patriotic_count = count_feature_number(data, "patriotic", year)
+  celebrity_count = count_feature_number(data, "celebrity", year)
+  danger_count = count_feature_number(data, "danger", year)
+  animals_count = count_feature_number(data, "animals", year)
+  use_sex_count = count_feature_number(data, "use_sex", year)
+  
+  year_value <- rep(year, 7)
+  count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
+                        celebrity_count, danger_count, animals_count, use_sex_count)
+  features <- c("funny", "show_product_quickly", "patriotic", 
+                "celebrity", "danger", "animals", "use_sex")
+  year_table <- cbind(year_value, count_of_feature, features)
+  year_df <- as.data.frame(year_table)
+  return(year_df)
+}
+
+
+# Then, using the "appender" function below to get the final dataframe for 
+## all years from 2000 to 2020. 
+appender <- function(data){
+  year_general_df <- generator(data, 2000)
+  for (j in seq(2001, 2020)){
+    year_general_df <- rbind(year_general_df, 
+                             generator(data, j))
+  }
+  return(year_general_df)
+}
+
+
+# Use the function and get our desired plot
+year_feature_df <- appender(youtube1)
+
+year_feature <- year_feature_df %>%
+  mutate(
+    year_value = as.numeric(as.character(year_value)),
+    count_of_feature = as.numeric(as.character(count_of_feature))
+  ) %>%
+  group_by(year_value, features) %>%
+  summarise(n = sum(count_of_feature)) %>%
+  mutate(percentage = n / sum(n))
+
+year_feature
+
+# Plot stacked area chart
+ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
+    geom_area(alpha=0.6 , size=.5, colour="white") +
+    labs(
+      x = "Year", 
+      y = "Percentage", 
+      fill = "Features",
+      title = "Percentage comparison among video features in\nSuperbowl commercials over years (2000~2020)",
+      subtitle = "By video features"
+    ) + 
+    theme_ipsum() +
+    theme(
+      plot.title = element_text(hjust = 0, size = 13)
+    )
+  
+
+
 ```
 
 
