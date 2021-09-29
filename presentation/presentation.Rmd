@@ -25,7 +25,7 @@ library(knitr)
 library(xaringanthemer)
 ```
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 # For better figure resolution
 knitr::opts_chunk$set(
   fig.retina = 3, 
@@ -37,7 +37,8 @@ knitr::opts_chunk$set(
 ```
 
 ```{r load-data, include=FALSE}
-# Load your data here
+youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', 
+                           show_col_types = FALSE)
 ```
 
 ```{r style-slides, echo = FALSE}
@@ -86,31 +87,88 @@ or text in two columns $^*$
 
 ## Code
 
-```{r boring-regression}
-# a boring regression
-model <- lm(dist ~ speed, data = cars)
-tidy(model)
-glance(model)
-```
-
 ---
 
 ## Plots
 
+```{r wrangling_function}
+# create compare function for different categories
+create_compare <- function(varname, full_data) {
+  full_data <- full_data %>% 
+    # drop N/A value for key variables 
+    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
+    # create new variables for preference, dislike, engagement, and features
+    mutate(like = like_count / view_count,
+           dislike = dislike_count / view_count,
+           engage = comment_count / view_count,
+           feature = as_label(enquo(varname))) %>% 
+    select({{varname}}, like, dislike, engage, feature, year) %>%
+    rename(val = as_label(enquo(varname)))
+  return(full_data)
+}
+```
+
+```{r create new table}
+# create a new data frame that contains key variables from above 
+all_compare <- rbind(create_compare(funny, youtube),
+                     create_compare(danger, youtube),
+                     create_compare(show_product_quickly, youtube),
+                     create_compare(patriotic, youtube),
+                     create_compare(celebrity, youtube),
+                     create_compare(animals, youtube),
+                     create_compare(use_sex, youtube)) %>% 
+  # change variable names to be more readable
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality'))
+```
+
 ```{r recode-species, echo = FALSE}
 # In this chunk I'm doing a bunch of analysis that I don't want to present 
 # in my slides. But I need the resulting data frame for a plot I want to present.
-penguins_modified <- penguins %>%
-  mutate(species = fct_other(species, keep = "Adelie"))
+
+# create new dataset for facetting
+feature_over_years <- all_compare %>% 
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality')) %>% 
+  group_by(year, feature, val) %>% 
+  summarise(mean_like = mean(like),
+            mean_engage = mean(engage))
 ```
 
-```{r plot-penguins, echo = FALSE, warning = FALSE, fig.alt = "Body mass vs. flipper lenght of Palmer Penguins for species Adelie and all the others combined together. There is a relatively strong, positive relationship between the two variables. The Adelie penguins are clustered together but they don't exhibit a different trend than the rest of the penguins."}
+```{r plot-compare, warning=FALSE, out.width="100%", fig.width=4, echo=FALSE}
+
 # Code hidden with echo = FALSE
 # Uses modified penguins dataset from previous chunk
 # Play around with height and width until you're happy with the look
-ggplot(penguins_modified, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-  geom_point() + 
-  theme_minimal()
+
+ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) + 
+  geom_line(aes(color = val)) + 
+  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+       subtitle = "By video features and year",
+       x = "Year of Superbowl",
+       y = "Average ratio of likes over views") +
+  facet_wrap(~feature) +
+  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  theme_minimal() +
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(margin = margin(r = 20),
+                                    hjust = 0.5),
+        panel.spacing = unit(1.5, "lines"),
+        legend.position = c(0.95, 0.1),
+        legend.title = element_blank())
 ```
 
 ---

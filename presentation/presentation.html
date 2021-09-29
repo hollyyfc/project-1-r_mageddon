@@ -4,8 +4,7 @@
     <title>Presentation title</title>
     <meta charset="utf-8" />
     <meta name="author" content="Team name   Names of team members" />
-    <meta name="date" content="2021-09-13" />
-    <script src="libs/header-attrs-2.10.6/header-attrs.js"></script>
+    <meta name="date" content="2021-09-29" />
     <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
   </head>
   <body>
@@ -16,7 +15,7 @@ class: center, middle, inverse, title-slide
 ## Presentation subtitle (if any)
 ### Team name <br> Names of team members
 ### Duke University
-### 2021-09-13
+### 2021-09-29
 
 ---
 
@@ -69,40 +68,54 @@ or text in two columns `\(^*\)`
 
 ## Code
 
-
-```r
-# a boring regression
-model &lt;- lm(dist ~ speed, data = cars)
-tidy(model)
-```
-
-```
-## # A tibble: 2 × 5
-##   term        estimate std.error statistic  p.value
-##   &lt;chr&gt;          &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
-## 1 (Intercept)   -17.6      6.76      -2.60 1.23e- 2
-## 2 speed           3.93     0.416      9.46 1.49e-12
-```
-
-```r
-glance(model)
-```
-
-```
-## # A tibble: 1 × 12
-##   r.squared adj.r.squared sigma statistic  p.value    df logLik   AIC   BIC
-##       &lt;dbl&gt;         &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-## 1     0.651         0.644  15.4      89.6 1.49e-12     1  -207.  419.  425.
-## # … with 3 more variables: deviance &lt;dbl&gt;, df.residual &lt;int&gt;, nobs &lt;int&gt;
-```
-
 ---
 
 ## Plots
 
 
+```r
+# create compare function for different categories
+create_compare &lt;- function(varname, full_data) {
+  full_data &lt;- full_data %&gt;% 
+    # drop N/A value for key variables 
+    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %&gt;% 
+    # create new variables for preference, dislike, engagement, and features
+    mutate(like = like_count / view_count,
+           dislike = dislike_count / view_count,
+           engage = comment_count / view_count,
+           feature = as_label(enquo(varname))) %&gt;% 
+    select({{varname}}, like, dislike, engage, feature, year) %&gt;%
+    rename(val = as_label(enquo(varname)))
+  return(full_data)
+}
+```
 
-&lt;img src="presentation_files/figure-html/plot-penguins-1.png" title="Body mass vs. flipper lenght of Palmer Penguins for species Adelie and all the others combined together. There is a relatively strong, positive relationship between the two variables. The Adelie penguins are clustered together but they don't exhibit a different trend than the rest of the penguins." alt="Body mass vs. flipper lenght of Palmer Penguins for species Adelie and all the others combined together. There is a relatively strong, positive relationship between the two variables. The Adelie penguins are clustered together but they don't exhibit a different trend than the rest of the penguins." width="70%" /&gt;
+
+```r
+# create a new data frame that contains key variables from above 
+all_compare &lt;- rbind(create_compare(funny, youtube),
+                     create_compare(danger, youtube),
+                     create_compare(show_product_quickly, youtube),
+                     create_compare(patriotic, youtube),
+                     create_compare(celebrity, youtube),
+                     create_compare(animals, youtube),
+                     create_compare(use_sex, youtube)) %&gt;% 
+  # change variable names to be more readable
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality'))
+```
+
+
+```
+## `summarise()` has grouped output by 'year', 'feature'. You can override using the `.groups` argument.
+```
+
+&lt;img src="presentation_files/figure-html/plot-compare-1.png" width="100%" /&gt;
 
 ---
 

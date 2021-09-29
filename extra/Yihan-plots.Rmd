@@ -140,7 +140,6 @@ ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) +
         panel.spacing = unit(1.5, "lines"),
         legend.position = c(0.95, 0.1),
         legend.title = element_blank())
-  
 ```
 
 
