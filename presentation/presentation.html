@@ -65,60 +65,42 @@ or text in two columns `\(^*\)`
 ]
 
 ---
+## What words appear more in election and non-election years? 
 
-## Code
+.pull-left[
+
+
+&lt;img src="presentation_files/figure-html/election-wordcloud-viz-1.png" width="60%" /&gt;
+]
+.pull-right[
+
+
+
+&lt;img src="presentation_files/figure-html/non-election-wordcloud-viz-1.png" width="60%" /&gt;
+]
 
 ---
 
-## Plots
+## What feature make the audience wants to hit 'like'?
 
 
-```r
-# create compare function for different categories
-create_compare &lt;- function(varname, full_data) {
-  full_data &lt;- full_data %&gt;% 
-    # drop N/A value for key variables 
-    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %&gt;% 
-    # create new variables for preference, dislike, engagement, and features
-    mutate(like = like_count / view_count,
-           dislike = dislike_count / view_count,
-           engage = comment_count / view_count,
-           feature = as_label(enquo(varname))) %&gt;% 
-    select({{varname}}, like, dislike, engage, feature, year) %&gt;%
-    rename(val = as_label(enquo(varname)))
-  return(full_data)
-}
-```
 
 
-```r
-# create a new data frame that contains key variables from above 
-all_compare &lt;- rbind(create_compare(funny, youtube),
-                     create_compare(danger, youtube),
-                     create_compare(show_product_quickly, youtube),
-                     create_compare(patriotic, youtube),
-                     create_compare(celebrity, youtube),
-                     create_compare(animals, youtube),
-                     create_compare(use_sex, youtube)) %&gt;% 
-  # change variable names to be more readable
-  mutate(feature = recode(feature, 'animals' = 'Animals', 
-                          'celebrity' = 'Celebrity', 
-                          'danger' = 'Danger',
-                          'funny' = 'Funny',
-                          'patriotic' = 'Patriotic',
-                          'show_product_quickly' = 'Show product quickly',
-                          'use_sex' = 'Use sexuality'))
-```
 
 
 ```
 ## `summarise()` has grouped output by 'year', 'feature'. You can override using the `.groups` argument.
 ```
 
-&lt;img src="presentation_files/figure-html/plot-compare-1.png" width="100%" /&gt;
+&lt;img src="presentation_files/figure-html/plot-compare-1.png" width="70%" /&gt;
 
 ---
 
+## What feature make the audience wants to comment?
+
+&lt;img src="presentation_files/figure-html/engagement_plot-1.png" width="70%" /&gt;
+
+---
 ## Plot and text
 
 .pull-left[
