@@ -23,9 +23,19 @@ library(tidymodels)
 library(palmerpenguins)
 library(knitr)
 library(xaringanthemer)
+library(wordcloud)
+library(RColorBrewer)
+library(tm)
+library(wordcloud2)
+library(ggwordcloud)
+library(tidytext)
+library(syuzhet)
+library(stringr)
+library(textdata)
+library(scales)
 ```
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 # For better figure resolution
 knitr::opts_chunk$set(
   fig.retina = 3, 
@@ -36,8 +46,9 @@ knitr::opts_chunk$set(
   )
 ```
 
-```{r load-data, include=FALSE}
-# Load your data here
+```{r load-data, include = FALSE}
+youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', 
+                           show_col_types = FALSE)
 ```
 
 ```{r style-slides, echo = FALSE}
@@ -83,38 +94,237 @@ or text in two columns $^*$
 ]
 
 ---
+## What words appear more in election and non-election years? 
 
-## Code
+.pull-left[
+``` {r data-prep-election-wordcloud, echo = FALSE}
+# Election years in the dataset
+election_year <- c(2000, 2004, 2008, 2012, 2016, 2020)
+# Adding an election year variable
+youtube <- youtube %>%
+  mutate(election_years = ifelse(year %in% election_year, 1, 0))
 
-```{r boring-regression}
-# a boring regression
-model <- lm(dist ~ speed, data = cars)
-tidy(model)
-glance(model)
+test <- youtube %>%
+  filter(election_years == 1) %>%
+  select(title)
+
+docs <- VCorpus(VectorSource(test))
+docs <- docs %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(stripWhitespace)
+docs <- tm_map(docs, content_transformer(tolower))
+docs <- tm_map(docs, removeWords, stopwords("english"))
+docs <- tm_map(docs, removeWords, c(
+  "super", "bowl", "commercial", "superbowl",
+  "bud", "light", "budweiser", "pepsi",
+  "hyundai", "doritos", "coke", "cocacola",
+  "cola", "coca", "kia", "toyota"
+))
+dtm <- TermDocumentMatrix(docs)
+matrix <- as.matrix(dtm)
+words <- sort(rowSums(matrix), decreasing = TRUE)
+election_df <- data.frame(word = names(words), freq = words)
+
+
+election_df <- election_df %>% 
+  mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
+   # Package to get sentiment scores for each word in the dataset
+  mutate(sentiment = get_sentiment(word,"syuzhet"))
 ```
+
+``` {r election-wordcloud-viz, warning = FALSE, out.width = "60%", fig.width = 8, echo = FALSE}
+election_df %>%
+  ggplot(aes(
+    label = word,
+    color = sentiment,
+    size = freq,
+    angle = angle
+  )) +
+  geom_text_wordcloud() +
+  scale_radius(range = c(2, 15)) +
+  theme_minimal() + 
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF") + 
+  labs(
+    title = "Election Year Ad Title Word Cloud",
+    subtitle = "Colored by Sentiment
+      Bluer for postive sentiments
+      Yellower for negative sentiment"
+  )
+```
+]
+.pull-right[
+```{r non-election-wordcloud-data-prep,echo = FALSE}
+# Isolating the title variable
+no_election_title <- youtube %>%
+  filter(election_years == 0) %>%
+  select(title)
+
+# Data Wrangling steps
+docs <- VCorpus(VectorSource(no_election_title))
+docs <- docs %>%
+  # Removing numbers
+  tm_map(removeNumbers) %>%
+  # Removing punctuation
+  tm_map(removePunctuation) %>%
+  # Removing whitespace
+  tm_map(stripWhitespace)
+
+# transforming words to lowercase
+docs <- tm_map(docs, content_transformer(tolower))
+# removing words that contain brand names
+docs <- tm_map(docs, removeWords, c(
+  "super", "bowl", "commercial", "superbowl",
+  "bud", "light", "budweiser", "pepsi",
+  "hyundai", "doritos", "coke", "cocacola",
+  "cola", "coca", "the", "kia","toyota"
+))
+
+# Creating df that can be used by ggwordcloud
+dtm <- TermDocumentMatrix(docs)
+matrix <- as.matrix(dtm)
+words <- sort(rowSums(matrix), decreasing = TRUE)
+non_election_df <- data.frame(word = names(words), freq = words)
+
+# Adding the sentiment score variable 
+non_election_df <- non_election_df %>% 
+  mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
+  filter(freq >= 2) %>% 
+  mutate(sentiment = get_sentiment(word,"syuzhet"))
+
+
+```
+
+
+``` {r non-election-wordcloud-viz, warning = FALSE, out.width = "60%", fig.width = 8, echo = FALSE}
+non_election_df %>% 
+  ggplot(aes(
+    label = word,
+    color = sentiment,
+    size = freq,
+    angle = angle
+  )) +
+  geom_text_wordcloud() +
+  scale_radius(range = c(3.5, 15)) +
+  theme_minimal() + 
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")+
+  labs(
+    title = "Non-election Year Ad Title Word Cloud",
+    subtitle = "Colored by Sentiment
+      Bluer for postive sentiments
+      Yellower for negative sentiment") 
+```
+]
 
 ---
 
-## Plots
+## What feature make the audience wants to hit 'like'?
 
-```{r recode-species, echo = FALSE}
-# In this chunk I'm doing a bunch of analysis that I don't want to present 
-# in my slides. But I need the resulting data frame for a plot I want to present.
-penguins_modified <- penguins %>%
-  mutate(species = fct_other(species, keep = "Adelie"))
+```{r wrangling_function, echo = FALSE}
+# create compare function for different categories
+create_compare <- function(varname, full_data) {
+  full_data <- full_data %>% 
+    # drop N/A value for key variables 
+    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
+    # create new variables for preference, dislike, engagement, and features
+    mutate(like = like_count / view_count,
+           dislike = dislike_count / view_count,
+           engage = comment_count / view_count,
+           feature = as_label(enquo(varname))) %>% 
+    select({{varname}}, like, dislike, engage, feature, year) %>%
+    rename(val = as_label(enquo(varname)))
+  return(full_data)
+}
 ```
 
-```{r plot-penguins, echo = FALSE, warning = FALSE, fig.alt = "Body mass vs. flipper lenght of Palmer Penguins for species Adelie and all the others combined together. There is a relatively strong, positive relationship between the two variables. The Adelie penguins are clustered together but they don't exhibit a different trend than the rest of the penguins."}
+```{r create new table, echo = FALSE}
+# create a new data frame that contains key variables from above 
+all_compare <- rbind(create_compare(funny, youtube),
+                     create_compare(danger, youtube),
+                     create_compare(show_product_quickly, youtube),
+                     create_compare(patriotic, youtube),
+                     create_compare(celebrity, youtube),
+                     create_compare(animals, youtube),
+                     create_compare(use_sex, youtube)) %>% 
+  # change variable names to be more readable
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality'))
+```
+
+```{r recode-features, echo = FALSE, warning = FALSE}
+# In this chunk I'm doing a bunch of analysis that I don't want to present 
+# in my slides. But I need the resulting data frame for a plot I want to present.
+
+# create new dataset for facetting
+feature_over_years <- all_compare %>% 
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality')) %>% 
+  group_by(year, feature, val) %>% 
+  summarise(mean_like = mean(like),
+            mean_engage = mean(engage))
+```
+
+```{r plot-compare, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE}
 # Code hidden with echo = FALSE
 # Uses modified penguins dataset from previous chunk
 # Play around with height and width until you're happy with the look
-ggplot(penguins_modified, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-  geom_point() + 
-  theme_minimal()
+
+ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) + 
+  geom_line(aes(color = val)) + 
+  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+       subtitle = "By video features and year",
+       x = "Year of Superbowl",
+       y = "Average ratio of likes over views") +
+  facet_wrap(~feature) +
+  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  theme_minimal() +
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(margin = margin(r = 20),
+                                    hjust = 0.5),
+        panel.spacing = unit(1.5, "lines"),
+        legend.position = c(0.95, 0.1),
+        legend.title = element_blank())
 ```
 
 ---
 
+## What feature make the audience wants to comment?
+
+```{r engagement_plot, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE}
+ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_engage)) + 
+  geom_line(aes(color = val)) + 
+  labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+       subtitle = "By video features and year",
+       x = "Year of Superbowl",
+       y = "Average ratio of comments over views") +
+  facet_wrap(~feature) +
+  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  theme_minimal() +
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(margin = margin(r = 20),
+                                    hjust = 0.5),
+        panel.spacing = unit(1.5, "lines"),
+        legend.position = c(0.95, 0.1),
+        legend.title = element_blank())
+```
+
+---
 ## Plot and text
 
 .pull-left[

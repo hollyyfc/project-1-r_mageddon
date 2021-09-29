@@ -76,7 +76,6 @@ election_df <- election_df %>%
 ```
 
 ``` {r election-wordcloud-viz}
-
 election_df %>%
   ggplot(aes(
     label = word,
@@ -94,7 +93,6 @@ election_df %>%
       Bluer for postive sentiments
       Yellower for negative sentiment"
   )
-
 ```
 
 ```{r non-election-wordcloud-data-prep}
@@ -140,7 +138,6 @@ non_election_df <- non_election_df %>%
 
 
 ``` {r non-election-wordcloud-viz}
-
 non_election_df %>% 
   ggplot(aes(
     label = word,
