@@ -5,18 +5,26 @@ Yihan Shi
 
 ### Introduction
 
-Introduction to the question and what parts of the dataset are necessary
-to answer the question. Also discuss why you’re interested in this
-question.
+We want to explore the trends in how the ads change over the years in
+terms of content, audience preferences, and engagement. To explore
+audience preference and engagement, like\_count, comment\_count, and
+view\_count are used to calculate ratio of like/engagement over total
+views. We also use logical variables such as `funny`, `danger`, etc. to
+differentiate the changes over years by each feature.
 
 ### Approach
 
-Describe what types of plots you are going to make to address your
-question. For each plot, provide a clear explanation as to why this plot
-(e.g. boxplot, barplot, histogram, etc.) is best for providing the
-information you are asking about. The two plots should be of different
-types, and at least one of the two plots needs to use either color
-mapping or facets.
+First, we used a line graphs faceted by `feature`, a variable that is
+created using all logical variables in the data set. The faceted line
+graph is suitable for time-dependent changes by each categorical
+variable. Because the logical variables are either true or false, 2
+different lines in each sub-plot clearly show how the trends (audience
+preference in this case) differ if an ad contains a feature or not.
+
+We also used a stacked bar plot to see how the proportion of each
+feature change over the years.
+
+### Analysis
 
 ``` r
 library(tidyverse)
@@ -50,45 +58,17 @@ library(scales)
     ##     col_factor
 
 ``` r
-youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
-
-glimpse(youtube)
+youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', 
+                           show_col_types = FALSE)
 ```
-
-    ## Rows: 247
-    ## Columns: 25
-    ## $ year                      <dbl> 2018, 2020, 2006, 2018, 2003, 2020, 2020, 20…
-    ## $ brand                     <chr> "Toyota", "Bud Light", "Bud Light", "Hynudai…
-    ## $ superbowl_ads_dot_com_url <chr> "https://superbowl-ads.com/good-odds-toyota/…
-    ## $ youtube_url               <chr> "https://www.youtube.com/watch?v=zeBZvwYQ-hA…
-    ## $ funny                     <lgl> FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE, …
-    ## $ show_product_quickly      <lgl> FALSE, TRUE, FALSE, TRUE, TRUE, TRUE, FALSE,…
-    ## $ patriotic                 <lgl> FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FA…
-    ## $ celebrity                 <lgl> FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE…
-    ## $ danger                    <lgl> FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE,…
-    ## $ animals                   <lgl> FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, TRUE,…
-    ## $ use_sex                   <lgl> FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FAL…
-    ## $ id                        <chr> "zeBZvwYQ-hA", "nbbp0VW7z8w", "yk0MQD5YgV8",…
-    ## $ kind                      <chr> "youtube#video", "youtube#video", "youtube#v…
-    ## $ etag                      <chr> "rn-ggKNly38Cl0C3CNjNnUH9xUw", "1roDoK-SYqSp…
-    ## $ view_count                <dbl> 173929, 47752, 142310, 198, 13741, 23636, 30…
-    ## $ like_count                <dbl> 1233, 485, 129, 2, 20, 115, 1470, 78, 342, 7…
-    ## $ dislike_count             <dbl> 38, 14, 15, 0, 3, 11, 384, 6, 7, 0, 14, 0, 2…
-    ## $ favorite_count            <dbl> 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
-    ## $ comment_count             <dbl> NA, 14, 9, 0, 2, 13, 227, 6, 30, 0, 8, 1, 13…
-    ## $ published_at              <dttm> 2018-02-03 11:29:14, 2020-01-31 21:04:13, 2…
-    ## $ title                     <chr> "Toyota Super Bowl Commercial 2018 Good Odds…
-    ## $ description               <chr> "Toyota Super Bowl Commercial 2018 Good Odds…
-    ## $ thumbnail                 <chr> "https://i.ytimg.com/vi/zeBZvwYQ-hA/sddefaul…
-    ## $ channel_title             <chr> "Funny Commercials", "VCU Brandcenter", "Joh…
-    ## $ category_id               <dbl> 1, 27, 17, 22, 24, 1, 24, 2, 24, 24, 24, 24,…
 
 ``` r
 # create compare function for different categories
-
 create_compare <- function(varname, full_data) {
   full_data <- full_data %>% 
+    # drop N/A value for key variables 
     drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
+    # create new variables for preference, dislike, engagement, and features
     mutate(like = like_count / view_count,
            dislike = dislike_count / view_count,
            engage = comment_count / view_count,
@@ -102,13 +82,22 @@ create_compare <- function(varname, full_data) {
 (Function was written with the help of TA)
 
 ``` r
+# create a new data frame that contains key variables from above 
 all_compare <- rbind(create_compare(funny, youtube),
                      create_compare(danger, youtube),
                      create_compare(show_product_quickly, youtube),
                      create_compare(patriotic, youtube),
                      create_compare(celebrity, youtube),
                      create_compare(animals, youtube),
-                     create_compare(use_sex, youtube))
+                     create_compare(use_sex, youtube)) %>% 
+  # change variable names to be more readable
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality'))
 ```
 
 ``` r
@@ -119,33 +108,42 @@ like_plot <- ggplot(all_compare, aes(x = like, y = feature, color = val)) +
        x = "Ratio of like over views",
        y = "Average rate of likes over views") +
   scale_color_manual("Feature", values = c("#0047AB", "#FF0000")) +
-  theme_minimal() 
+  theme_minimal()
+```
 
+``` r
 dislike_plot <- ggplot(all_compare, aes(x = dislike, y = feature, color = val)) +
-  geom_boxplot()
+  geom_boxplot(aes(color = val)) + 
+  labs(title = "The rate of audience hitting 'dislike' for Youtube Superbowl Commercials\nOver all years from 2000 to 2020",
+       subtitle = "By video features",
+       x = "Ratio of dislike over views",
+       y = "Average rate of likes over views") +
+  scale_color_manual("Feature", values = c("#0047AB", "#FF0000")) +
+  theme_minimal()
+```
 
-engage_plot <- ggplot(all_compare, aes(x = engage, y = feature, color = val)) +
-  geom_boxplot()
-
+``` r
 like_plot
 ```
 
-![](Yihan-plots_files/figure-gfm/plotting%20compare-1.png)<!-- -->
+![](Yihan-plots_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 ``` r
 dislike_plot
 ```
 
-![](Yihan-plots_files/figure-gfm/plotting%20compare-2.png)<!-- -->
+![](Yihan-plots_files/figure-gfm/unnamed-chunk-1-2.png)<!-- -->
 
 ``` r
-engage_plot
-```
-
-![](Yihan-plots_files/figure-gfm/plotting%20compare-3.png)<!-- -->
-
-``` r
+# create new dataset for facetting
 feature_over_years <- all_compare %>% 
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality')) %>% 
   group_by(year, feature, val) %>% 
   summarise(mean_like = mean(like),
             mean_engage = mean(engage))
@@ -154,35 +152,81 @@ feature_over_years <- all_compare %>%
     ## `summarise()` has grouped output by 'year', 'feature'. You can override using the `.groups` argument.
 
 ``` r
-ggplot(feature_over_years, aes(x = year, y = mean_like)) + 
+ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) + 
   geom_line(aes(color = val)) + 
   labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video features and year",
-       x = "Year",
+       x = "Year of Superbowl",
        y = "Average ratio of likes over views") +
-  facet_wrap(feature ~ .) + 
+  facet_wrap(~feature) +
   scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
   scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-  suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
-  theme_minimal() 
+                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  theme_minimal() +
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(margin = margin(r = 20),
+                                    hjust = 0.5),
+        panel.spacing = unit(1.5, "lines"),
+        legend.position = c(0.95, 0.1),
+        legend.title = element_blank())
 ```
 
-![](Yihan-plots_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+    ## Warning: Continuous limits supplied to discrete scale.
+    ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
+
+![](Yihan-plots_files/figure-gfm/feature_over_years-1.png)<!-- -->
 
 ``` r
-ggplot(feature_over_years, aes(x = year, y = mean_engage)) + 
+ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_engage)) + 
   geom_line(aes(color = val)) + 
-  facet_wrap(feature ~ .)
+  labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+       subtitle = "By video features and year",
+       x = "Year of Superbowl",
+       y = "Average ratio of comments over views") +
+  facet_wrap(~feature) +
+  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  theme_minimal() +
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(margin = margin(r = 20),
+                                    hjust = 0.5),
+        panel.spacing = unit(1.5, "lines"),
+        legend.position = c(0.95, 0.1),
+        legend.title = element_blank())
 ```
 
-![](Yihan-plots_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+    ## Warning: Continuous limits supplied to discrete scale.
+    ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 
-### Analysis
-
-provide the code that generates your plots. Use scale functions to
-provide nice axis labels and guides.
+![](Yihan-plots_files/figure-gfm/engagement_plot-1.png)<!-- -->
 
 ### Discussion
+
+First, we look at audience preference of various features in ads. From
+2000 to 2020, the ads that contain dangerous elements are getting more
+likes than ads that do not contain dangerous elements. There is no
+obvious trend that the audience strongly prefer a specific feature other
+than `danger` over the years.In certain years, audience feel strongly
+about ads that contain specific features. In 2010, ads that contain
+`animals` element are liked more than 3 times compared to ads that do
+not contain animals. Same observation is shown for ads containing
+`patriotic` element in 2010. However, from 2017 to 2020, ads that
+contain `patriotic` content become less liked. Ads that use sexuality
+are far more liked in 2004 but are less liked in 2015. In 2002, the ads
+that have no humorous element are liked almost 3 times as ads that have
+humorous element.
+
+Then, we look at what kinds of ads elicit the audience to engage by
+commenting. In general, the engagement rate is pretty low. Most ads
+receive almost no comments. However, in 2004 specifically there is are
+significant differences between engagement rate for all features. Ads
+that contain `animal`, `funny`, show product quickly, or use sexuality
+shows higher engagement compared the ads that don’t contain these
+features. On the other hand, ads that don’t contain `celebrity`,
+`patriotic`, or `danger` tend to have higher engagement rates.
 
 The year variable used here denotes the Superbowl year where the
 commercial was shown. However, some commercials have a different
