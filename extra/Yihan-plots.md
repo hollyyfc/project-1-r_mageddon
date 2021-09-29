@@ -35,8 +35,19 @@ library(tidyverse)
 
 ``` r
 library(ggplot2)
-library(cowplot)
+library(scales)
 ```
+
+    ## 
+    ## Attaching package: 'scales'
+
+    ## The following object is masked from 'package:purrr':
+    ## 
+    ##     discard
+
+    ## The following object is masked from 'package:readr':
+    ## 
+    ##     col_factor
 
 ``` r
 youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
@@ -73,62 +84,16 @@ glimpse(youtube)
     ## $ category_id               <dbl> 1, 27, 17, 22, 24, 1, 24, 2, 24, 24, 24, 24,…
 
 ``` r
-# calcualte percentages for each category
-nr <- nrow(youtube)
-
-funny_perc <-  sum(youtube$funny)/nr
-show_product_quickly_perc <- sum(youtube$show_product_quickly)/nr
-patriotic_perc <-  sum(youtube$patriotic)/nr
-celebrity_perc <- sum(youtube$celebrity)/nr
-danger_perc <- sum(youtube$danger)/nr
-animals_perc <- sum(youtube$animals)/nr
-use_sex_perc <- sum(youtube$use_sex)/nr
-
-# make dataframe
-percentage_table <- tribble(
-  ~category, ~percentage,
-  'funny', funny_perc,
-  'show_product_quickly', show_product_quickly_perc,
-  'patriotic', patriotic_perc,
-  'celebrity', celebrity_perc,
-  'danger', danger_perc,
-  'animals', animals_perc,
-  'use_sex', use_sex_perc
-)
-
-percentage_table
-```
-
-    ## # A tibble: 7 × 2
-    ##   category             percentage
-    ##   <chr>                     <dbl>
-    ## 1 funny                     0.692
-    ## 2 show_product_quickly      0.684
-    ## 3 patriotic                 0.166
-    ## 4 celebrity                 0.287
-    ## 5 danger                    0.304
-    ## 6 animals                   0.372
-    ## 7 use_sex                   0.267
-
-``` r
-ggplot(percentage_table, aes(x = category, y = percentage)) + 
-  geom_col() + 
-  scale_colour_brewer(palette = "Pastel1")
-```
-
-![](Yihan-plots_files/figure-gfm/plotting_percentage_overall-1.png)<!-- -->
-
-``` r
-# create compare for different categories
+# create compare function for different categories
 
 create_compare <- function(varname, full_data) {
   full_data <- full_data %>% 
     drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
-    mutate(avg_like = like_count / view_count,
-           avg_dislike = dislike_count / view_count,
-           avg_engage = comment_count / view_count,
+    mutate(like = like_count / view_count,
+           dislike = dislike_count / view_count,
+           engage = comment_count / view_count,
            feature = as_label(enquo(varname))) %>% 
-    select({{varname}}, avg_like, avg_dislike, avg_engage, feature, year) %>%
+    select({{varname}}, like, dislike, engage, feature, year) %>%
     rename(val = as_label(enquo(varname)))
   return(full_data)
 }
@@ -147,13 +112,19 @@ all_compare <- rbind(create_compare(funny, youtube),
 ```
 
 ``` r
-like_plot <- ggplot(all_compare, aes(x = avg_like, y = feature, color = val)) +
+like_plot <- ggplot(all_compare, aes(x = like, y = feature, color = val)) +
+  geom_boxplot(aes(color = val)) + 
+  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nOver all years from 2000 to 2020",
+       subtitle = "By video features",
+       x = "Ratio of like over views",
+       y = "Average rate of likes over views") +
+  scale_color_manual("Feature", values = c("#0047AB", "#FF0000")) +
+  theme_minimal() 
+
+dislike_plot <- ggplot(all_compare, aes(x = dislike, y = feature, color = val)) +
   geom_boxplot()
 
-dislike_plot <- ggplot(all_compare, aes(x = avg_dislike, y = feature, color = val)) +
-  geom_boxplot()
-
-engage_plot <- ggplot(all_compare, aes(x = avg_engage, y = feature, color = val)) +
+engage_plot <- ggplot(all_compare, aes(x = engage, y = feature, color = val)) +
   geom_boxplot()
 
 like_plot
@@ -174,82 +145,34 @@ engage_plot
 ![](Yihan-plots_files/figure-gfm/plotting%20compare-3.png)<!-- -->
 
 ``` r
-funny_over_years <- all_compare %>% 
-  filter(feature == 'funny') %>% 
-  group_by(year, val) %>% 
-  summarise(mean_like = mean(avg_like))
+feature_over_years <- all_compare %>% 
+  group_by(year, feature, val) %>% 
+  summarise(mean_like = mean(like),
+            mean_engage = mean(engage))
 ```
 
-    ## `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
+    ## `summarise()` has grouped output by 'year', 'feature'. You can override using the `.groups` argument.
 
 ``` r
-ggplot(funny_over_years, aes(x = year, y = mean_like, group = val)) + 
-  geom_line(aes(color = val))
+ggplot(feature_over_years, aes(x = year, y = mean_like)) + 
+  geom_line(aes(color = val)) + 
+  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+       subtitle = "By video features and year",
+       x = "Year",
+       y = "Average ratio of likes over views") +
+  facet_wrap(feature ~ .) + 
+  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+  suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  theme_minimal() 
 ```
 
-![](Yihan-plots_files/figure-gfm/funny-by-year-1.png)<!-- -->
+![](Yihan-plots_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 ``` r
-animals_over_years <- all_compare %>% 
-  filter(feature == 'animals') %>% 
-  group_by(year, val) %>% 
-  summarise(mean_like = mean(avg_like))
-```
-
-    ## `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
-
-``` r
-ggplot(animals_over_years, aes(x = year, y = mean_like, group = val)) + 
-  geom_line(aes(color = val))
-```
-
-![](Yihan-plots_files/figure-gfm/funny-by-year-2.png)<!-- -->
-
-``` r
-use_sex_over_years <- all_compare %>% 
-  filter(feature == 'use_sex') %>% 
-  group_by(year, val) %>% 
-  summarise(mean_like = mean(avg_like))
-```
-
-    ## `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
-
-``` r
-ggplot(use_sex_over_years, aes(x = year, y = mean_like, group = val)) + 
-  geom_line(aes(color = val))
-```
-
-![](Yihan-plots_files/figure-gfm/funny-by-year-3.png)<!-- -->
-
-``` r
-patriotic_over_years <- all_compare %>% 
-  filter(feature == 'patriotic') %>% 
-  group_by(year, val) %>% 
-  summarise(mean_like = mean(avg_like))
-```
-
-    ## `summarise()` has grouped output by 'year'. You can override using the `.groups` argument.
-
-``` r
-ggplot(patriotic_over_years, aes(x = year, y = mean_like, group = val)) + 
-  geom_line(aes(color = val))
-```
-
-![](Yihan-plots_files/figure-gfm/funny-by-year-4.png)<!-- -->
-
-``` r
-year_compare <- all_compare %>% 
-  filter(val == TRUE) %>% 
-  group_by(year, val, feature) %>% 
-  summarise(mean_like = mean(avg_like))
-```
-
-    ## `summarise()` has grouped output by 'year', 'val'. You can override using the `.groups` argument.
-
-``` r
-ggplot(year_compare, aes(x = year, y = mean_like)) + 
-  geom_line() + 
-  facet_grid(feature ~ .)
+ggplot(feature_over_years, aes(x = year, y = mean_engage)) + 
+  geom_line(aes(color = val)) + 
+  facet_wrap(feature ~ .)
 ```
 
 ![](Yihan-plots_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
@@ -260,3 +183,10 @@ provide the code that generates your plots. Use scale functions to
 provide nice axis labels and guides.
 
 ### Discussion
+
+The year variable used here denotes the Superbowl year where the
+commercial was shown. However, some commercials have a different
+published date on Youtube. Furthermore, the youtube videos have been
+collected from random Youtube users instead of influncers or offial
+commercial accounts. Therefore, the views, likes, and engagement also
+depend on the account itself.

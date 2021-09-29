@@ -104,7 +104,8 @@ feature_over_years <- all_compare %>%
 
 ggplot(feature_over_years, aes(x = year, y = mean_like)) + 
   geom_line(aes(color = val)) + 
-  facet_wrap(feature ~ .)
+  facet_wrap(feature ~ .) + 
+  scale_
 
 ggplot(feature_over_years, aes(x = year, y = mean_engage)) + 
   geom_line(aes(color = val)) + 
