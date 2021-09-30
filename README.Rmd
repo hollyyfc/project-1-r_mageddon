@@ -206,7 +206,9 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
   facet_wrap(~feature) +
   scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
   scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+                                            suffix = "%", big.mark = " ",
+                                            decimal.mark = ".",
+                                            trim = TRUE)) +
   scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
   theme_minimal() +
   theme(axis.title.x = element_text(hjust = 0.5),
