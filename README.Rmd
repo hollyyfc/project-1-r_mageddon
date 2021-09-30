@@ -19,6 +19,7 @@ library(tidytext)
 library(syuzhet)
 library(stringr)
 library(textdata)
+
 ```
 
 ```{r load-data, echo = FALSE}
@@ -73,8 +74,8 @@ each sub-plot clearly show how the trends (audience preference in this case)
 differ if an ad contains a feature or not.
 
 ### Analysis
-
-```{r STACKED-BAR-CHART}
+Plot 1: 
+```{r counter}
 # First, create a function that returns total count of a specific feature in one year.
 count_feature_number <- function(data, feature_name, desired_year){
   count1 = 0
@@ -87,6 +88,9 @@ count_feature_number <- function(data, feature_name, desired_year){
   }
   return(count1)
 }
+```
+
+```{r generator}
 # With help from the counter above, we define a new function that creates a 
 ## generalized feature counting dataframe for a single year.
 generator <- function(data, year){
@@ -108,6 +112,9 @@ generator <- function(data, year){
   year_df <- as.data.frame(year_table)
   return(year_df)
 }
+```
+
+```{r appender}
 # Then, using the "appender" function below to get the final dataframe for 
 ## all years from 2000 to 2020. 
 appender <- function(data){
@@ -118,8 +125,11 @@ appender <- function(data){
   }
   return(year_general_df)
 }
+```
+
+```{r STACKED-BAR-CHART}
 # Use the function and get our desired plot
-year_feature_df <- appender(youtube1)
+year_feature_df <- appender(youtube)
 year_feature <- year_feature_df %>%
   mutate(
     year_value = as.numeric(as.character(year_value)),
@@ -128,7 +138,7 @@ year_feature <- year_feature_df %>%
   group_by(year_value, features) %>%
   summarise(n = sum(count_of_feature)) %>%
   mutate(percentage = n / sum(n))
-year_feature
+
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
@@ -151,6 +161,7 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
     )
 ```
 
+Plot 2:
 ```{r wrangling_function}
 # create compare function for different categories
 create_compare <- function(varname, full_data) {
@@ -280,7 +291,7 @@ and engagement also depend on the account itself.
 
 
 
-## Question 2 <- 2. How do election year ads differ from non-election year ads in terms of content and description?
+## Question 2: How do election year ads differ from non-election year ads in terms of content and description?
 
 ### Introduction
 
@@ -520,7 +531,8 @@ Our presentation can be found [here](presentation/presentation.html).
 ## Data 
 
 Include a citation for your data here. 
-See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on proper citation for datasets. 
+See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on 
+proper citation for datasets. 
 If you got your data off the web, make sure to note the retrieval date.
 
 ## References
