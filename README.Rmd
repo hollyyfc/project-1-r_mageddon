@@ -28,33 +28,45 @@ youtube <- readr::read_csv('data/youtube.csv', show_col_types = FALSE)
 
 ## Introduction
 
-(1-2 paragraphs)
-Brief introduction to the dataset.
-You may repeat some of the information about the dataset provided in the introduction to the dataset on the TidyTuesday repository, paraphrasing on your own terms.
-Imagine that your project is a standalone document and the grader has no prior knowledge of the dataset.
+The `youtube` dataset contains a list of ads from the 10 brands that had the most
+advertisements in Super Bowls from 2000 to 2020, according to data from superbowl-ads.com, 
+with matching videos found on YouTube. It was then analyzed by FiveThirtyEight 
+staffers to come up with seven defining characteristics of a Super Bowl ad:
+`funny`, `danger`, `use_sex`, `show_product_quickly`, `celebrity`, `patriotic`,
+`animals`.
 
-## Question 1 <- Update title to relate to the question you’re answering
+
+
+## Question 1：What's the trend in the ads' content, audience preferences, and
+engagement over the years?
 
 ### Introduction
 
-We want to explore the trends in how the ads change over the years in terms of content, 
-audience preferences, and engagement. To analyze the change in content we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`, `celebrity`, and `animals`. 
-To explore audience preference and engagement, `like_count`, `comment_count`, and `view_count` are 
-used to calculate ratio of like/engagement over total views.
+We want to explore the trends in how the ads change over the years in terms of 
+content, audience preferences, and engagement. To analyze the change in content 
+we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`,
+`celebrity`, and `animals`. To explore audience preference and engagement,
+`like_count`, `comment_count`, and `view_count` are used to calculate ratio of 
+like/engagement over total views.
 
-Many things have changed in the first 20 years of the 21st century. There are life science breakthroughs, 
-political conflicts, feminist movements, etc. Therefore, we want to see if people’s reaction to Super Bowl 
-commercials reflect the changes in their lifestyles and thoughts over the years. The changes in the ads 
-themselves may also tell how companies are reacting to audience preferences.
+Many things have changed in the first 20 years of the 21st century. There are 
+life science breakthroughs, political conflicts, feminist movements, etc. 
+Therefore, we want to see if people’s reaction to Super Bowl commercials reflect 
+the changes in their lifestyles and thoughts over the years. The changes in the 
+ads themselves may also tell how companies are reacting to audience preferences.
+
 
 ### Approach
 
-We first used a stacked area chart to see how the proportion of each video feature changes
-over years. Here, a stacked area chart is used because, with continuous lines connecting 
-and separating the elements in same group, it is visually compatible when we plan to have year 
-(a time variable) as our x axis. More specifically, over the years on the x axis, we can compare 
-the relative percentage change of each feature on the y axis with areas divided 
-by lines linking them together.
+(Why stacked area graph better?)
+We also used a stacked area chart to see how the proportion of each feature change
+over the years. A stacked area chart is similarly plotted as a stacked bar plot, but with
+lines connecting the elements with same group, which is visually compatible when we plan to 
+have year (time variable) as our x axis. More specifically, over the years on the x axis, we 
+can see the relative percentage change of each video feature on the y axis with areas divided 
+by lines linking them together. The percentage, or proportion, of each feature is calculated
+by first counting the total number of TRUE-valued Boolean variable in each year ("funny", 
+"patriotic", etc.), and then generate a dataframe with all 21 years together. 
 
 First, we used a line graphs faceted by `feature`, a variable that is created using
 all logical variables in the data set. The faceted line graph is suitable for time-dependent
@@ -65,7 +77,6 @@ preference in this case) differ if an ad contains a feature or not.
 ### Analysis
 
 ```{r STACKED-BAR-CHART}
-
 # First, create a function that returns total count of a specific feature in one year.
 count_feature_number <- function(data, feature_name, desired_year){
   count1 = 0
@@ -78,8 +89,6 @@ count_feature_number <- function(data, feature_name, desired_year){
   }
   return(count1)
 }
-
-
 # With help from the counter above, we define a new function that creates a 
 ## generalized feature counting dataframe for a single year.
 generator <- function(data, year){
@@ -100,8 +109,6 @@ generator <- function(data, year){
   year_df <- as.data.frame(year_table)
   return(year_df)
 }
-
-
 # Then, using the "appender" function below to get the final dataframe for 
 ## all years from 2000 to 2020. 
 appender <- function(data){
@@ -112,11 +119,8 @@ appender <- function(data){
   }
   return(year_general_df)
 }
-
-
 # Use the function and get our desired plot
-year_feature_df <- appender(youtube)
-
+year_feature_df <- appender(youtube1)
 year_feature <- year_feature_df %>%
   mutate(
     year_value = as.numeric(as.character(year_value)),
@@ -125,8 +129,7 @@ year_feature <- year_feature_df %>%
   group_by(year_value, features) %>%
   summarise(n = sum(count_of_feature)) %>%
   mutate(percentage = n / sum(n))
-
-
+year_feature
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
@@ -141,9 +144,6 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
     theme(
       plot.title = element_text(hjust = 0, size = 13)
     )
-  
-
-
 ```
 
 ```{r wrangling_function}
@@ -180,47 +180,6 @@ all_compare <- rbind(create_compare(funny, youtube),
                           'funny' = 'Funny',
                           'patriotic' = 'Patriotic',
                           'show_product_quickly' = 'Show product quickly',
-                          'use_sex' = 'Use sexuality'))
-```
-
-
-```{r plotting compare_like}
-like_plot <- ggplot(all_compare, aes(x = like, y = feature, color = val)) +
-  geom_boxplot(aes(color = val)) + 
-  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nOver all years from 2000 to 2020",
-       subtitle = "By video features",
-       x = "Ratio of like over views",
-       y = "Average rate of likes over views") +
-  scale_color_manual("Feature", values = c("#0047AB", "#FF0000")) +
-  theme_minimal()
-```
-
-
-```{r plotting compare_dislike}
-dislike_plot <- ggplot(all_compare, aes(x = dislike, y = feature, color = val)) +
-  geom_boxplot(aes(color = val)) + 
-  labs(title = "The rate of audience hitting 'dislike' for Youtube Superbowl Commercials\nOver all years from 2000 to 2020",
-       subtitle = "By video features",
-       x = "Ratio of dislike over views",
-       y = "Average rate of likes over views") +
-  scale_color_manual("Feature", values = c("#0047AB", "#FF0000")) +
-  theme_minimal()
-```
-
-```{r}
-like_plot
-dislike_plot
-```
-
-```{r create new dataset for facetting}
-# create new dataset for facetting
-feature_over_years <- all_compare %>% 
-  mutate(feature = recode(feature, 'animals' = 'Animals', 
-                          'celebrity' = 'Celebrity', 
-                          'danger' = 'Danger',
-                          'funny' = 'Funny',
-                          'patriotic' = 'Patriotic',
-                          'show_product_quickly' = 'Show product quickly',
                           'use_sex' = 'Use sexuality')) %>% 
   group_by(year, feature, val) %>% 
   summarise(mean_like = mean(like),
@@ -228,8 +187,8 @@ feature_over_years <- all_compare %>%
 ```
 
 
-```{r feature_over_years}
-ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) + 
+```{r all_compare}
+ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
   geom_line(aes(color = val)) + 
   labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video features and year",
@@ -238,7 +197,9 @@ ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) +
   facet_wrap(~feature) +
   scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
   scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+                                            suffix = "%", big.mark = " ",
+                                            decimal.mark = ".",
+                                            trim = TRUE)) +
   scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
   theme_minimal() +
   theme(axis.title.x = element_text(hjust = 0.5),
@@ -251,7 +212,7 @@ ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) +
 
 
 ```{r engagement_plot}
-ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_engage)) + 
+ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
   geom_line(aes(color = val)) + 
   labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video features and year",
@@ -272,14 +233,6 @@ ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_engage)) +
 ```
 
 ### Discussion
-
-The percentage, or proportion, of each feature is calculated
-by first counting the total number of TRUE-valued Boolean variable in each year ("funny", 
-"patriotic", etc.), and then generate a dataframe with all 21 years together. In the stacked area plot, we should focus on the width of each color bands, instead
-of trying to interpret the lines. Here, we can see that over the years, `funny` and 
-`show_product_quickly` take up the highest proportion among the seven video features.
-
-
 
 First, we look at audience preference of various features in ads. From 2000 to 
 2020, the ads that contain dangerous elements are getting more likes than ads that
@@ -307,22 +260,43 @@ Furthermore, the youtube videos have been collected from random Youtube users
 instead of influncers or offial commercial accounts. Therefore, the views, likes,
 and engagement also depend on the account itself.
 
-
-
 ## Question 2 <- Update title to relate to the question you’re answering
 
 ### Introduction
 
-Our second question aims to explore the difference, if any, between ads aired during election years compared to those aired during non-election years. Particularly, we want to analyze if there is any noticeable difference in the description and content between the election and non-election year ads. Answering this question involves looking at the `title` variable to analyze how these ads were described, and then analyzing the boolean content variables of `use_sex`, `patriotic`,`funny`,`celebrity`,`danger`, and `animals` to see if they had any noticeable differences in their content. Finally, the `year` variable is also needed to distinguish between election and non-election years.
+Our second question aims to explore the difference, if any, between ads aired during 
+election years compared to those aired during non-election years. Particularly, 
+we want to analyze if there is any noticeable difference in the description and 
+content between the election and non-election year ads. Answering this question 
+involves looking at the `title` variable to analyze how these ads were described, 
+and then analyzing the boolean content variables of `use_sex`, `patriotic`,`funny`
+,`celebrity`,`danger`, and `animals` to see if they had any noticeable differences
+in their content. Finally, the `year` variable is also needed to distinguish between
+election and non-election years.
 
-We are interested in exploring this question because election years mark a significant cultural moment in the US. Therefore, we want to see whether this focus on politics translates into any noticeable effect on super bowl ads. 
+We are interested in exploring this question because election years mark a significant
+cultural moment in the US. Therefore, we want to see whether this focus on politics
+translates into any noticeable effect on super bowl ads. 
 
 ### Approach
 
 
-To analyze the description aspect of our question, we decided to use a word cloud visualization since we felt it was the most informative way to visualize what major descriptors are used for the ads. The alternative way of analyzing `title` that we considered included a bar char for top 10-20 words. However, we decided to opt for the word cloud since it provided more information in terms of relative occurrences of all the words being used (by size). Creating the word cloud involved cleaning the text (for e.g turning all words lower, removing punctuation, removing numbers) which was done by the `tm` library. We also performed sentiment analysis on the words using the `get_sentiment()` function and colored the word cloud based on the words' sentiment score. 
+To analyze the description aspect of our question, we decided to use a word cloud
+visualization since we felt it was the most informative way to visualize what major
+descriptors are used for the ads. The alternative way of analyzing `title` that 
+we considered included a bar char for top 10-20 words. However, we decided to opt
+for the word cloud since it provided more information in terms of relative occurrences
+of all the words being used (by size). Creating the word cloud involved cleaning the
+text (for e.g turning all words lower, removing punctuation, removing numbers)which
+was done by the `tm` library. We also performed sentiment analysis on the words
+using the `get_sentiment()` function and colored the word cloud based on the
+words' sentiment score. 
 
-To analyze the content aspect, we decided to opt for a column graph with percentage values of each content category as labels of the visualization. Possible alternative that we considered was a pie chart but since our column graph shows the percentage values as well as count values, we decided to go for the visualziation that maximized information. 
+To analyze the content aspect, we decided to opt for a column graph with percentage
+values of each content category as labels of the visualization. Possible alternative
+that we considered was a pie chart but since our column graph shows the percentage
+values as well as count values, we decided to go for the visualziation that 
+maximized information. 
 
 ### Analysis
 
@@ -332,11 +306,9 @@ election_year <- c(2000, 2004, 2008, 2012, 2016, 2020)
 # Adding an election year variable
 youtube <- youtube %>%
   mutate(election_years = ifelse(year %in% election_year, 1, 0))
-
 test <- youtube %>%
   filter(election_years == 1) %>%
   select(title)
-
 docs <- VCorpus(VectorSource(test))
 docs <- docs %>%
   tm_map(removeNumbers) %>%
@@ -354,13 +326,10 @@ dtm <- TermDocumentMatrix(docs)
 matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing = TRUE)
 election_df <- data.frame(word = names(words), freq = words)
-
-
 election_df <- election_df %>% 
   mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
    # Package to get sentiment scores for each word in the dataset
   mutate(sentiment = get_sentiment(word,"syuzhet"))
-
 ```
 
 ``` {r election-wordcloud-viz}
@@ -388,7 +357,6 @@ election_df %>%
 no_election_title <- youtube %>%
   filter(election_years == 0) %>%
   select(title)
-
 # Data Wrangling steps
 docs <- VCorpus(VectorSource(no_election_title))
 docs <- docs %>%
@@ -398,7 +366,6 @@ docs <- docs %>%
   tm_map(removePunctuation) %>%
   # Removing whitespace
   tm_map(stripWhitespace)
-
 # transforming words to lowercase
 docs <- tm_map(docs, content_transformer(tolower))
 # removing words that contain brand names
@@ -408,20 +375,16 @@ docs <- tm_map(docs, removeWords, c(
   "hyundai", "doritos", "coke", "cocacola",
   "cola", "coca", "the", "kia","toyota"
 ))
-
 # Creating df that can be used by ggwordcloud
 dtm <- TermDocumentMatrix(docs)
 matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing = TRUE)
 non_election_df <- data.frame(word = names(words), freq = words)
-
 # Adding the sentiment score variable 
 non_election_df <- non_election_df %>% 
   mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
   filter(freq >= 2) %>% 
   mutate(sentiment = get_sentiment(word,"syuzhet"))
-
-
 ```
 
 
@@ -458,8 +421,6 @@ election_yr <- youtube %>%
   group_by(name) %>%
   summarise(n = n()) %>%
   mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
-
-
 # Creating the plot
 election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
@@ -480,7 +441,6 @@ election_yr %>%
 
 
 ```{r non-election-col-plot}
-
 # Creating variable with no election, using pivot_longer to get attributes in the
 # same column, and creating a percentage variable
 no_election_yr <- youtube %>%
@@ -490,7 +450,6 @@ no_election_yr <- youtube %>%
   group_by(name) %>%
   summarise(n = n()) %>%
   mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
-
 # No Election year col vizualization
 no_election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
@@ -510,11 +469,28 @@ no_election_yr %>%
 
 ### Discussion
 
-We can divide the discussion of our visualizations into two parts: comparison by description and comparison by content. 
+We can divide the discussion of our visualizations into two parts: comparison by 
+description and comparison by content. 
 
-When comparing our two words clouds, it immediately becomes clear that there is some overlap in the words used in Superbowl Ad titles. These include, winner, new, and nfl. Similarly, there does not seem to be any major difference in the overall sentiment makeup of these words. We can gauge this by observing that both the word clouds have a few blue words (indicating positive sentiment), very few yellow words (indicating negative sentiment), and majority brown words (indicating neutral sentiment). This goes on to indicate that there is very little difference in the titles of superbowl ads in election years compared to non-election years. This result was surprising since our team was expecting the election titles to contain more patriotic words such as "America", "Freedom", and "Liberty" but it appears as if the ad titles are not significantly affected by election and non-election years. 
+When comparing our two words clouds, it immediately becomes clear that there is 
+some overlap in the words used in Superbowl Ad titles. These include, winner, new,
+and nfl. Similarly, there does not seem to be any major difference in the overall
+sentiment makeup of these words. We can gauge this by observing that both the word
+clouds have a few blue words (indicating positive sentiment), very few yellow words
+(indicating negative sentiment), and majority brown words (indicating neutral sentiment).
+This goes on to indicate that there is very little difference in the titles of 
+superbowl ads in election years compared to non-election years. This result was
+surprising since our team was expecting the election titles to contain more patriotic
+words such as "America", "Freedom", and "Liberty" but it appears as if the ad titles
+are not significantly affected by election and non-election years. 
 
-We observed a similar relation when analyzing the content of election and non-election year ads. For both these categories, there seemed to be a marginal difference in the attribute makeup, indicating that even the content of ads was very similar in election and non-election years. However, it was interesting to note that `use_sex` attribute dropped from 14% in non-election years to 9% in election years. While this could be indicative of a slight variation in content, it more more likely that this change was a coincidence.  
+We observed a similar relation when analyzing the content of election and non-election
+year ads. For both these categories, there seemed to be a marginal difference in the
+attribute makeup, indicating that even the content of ads was very similar in election
+and non-election years. However, it was interesting to note that `use_sex` attribute
+dropped from 14% in non-election years to 9% in election years. While this could
+be indicative of a slight variation in content, it more more likely that this
+change was a coincidence.  
 
 
 ## Presentation
@@ -528,5 +504,5 @@ See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on prop
 If you got your data off the web, make sure to note the retrieval date.
 
 ## References
-https://www.r-graph-gallery.com/136-stacked-area-chart
+
 https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html
