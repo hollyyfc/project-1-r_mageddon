@@ -192,7 +192,6 @@ election_yr %>%
 
 
 ```{r non-election-col-plot}
-
 # Creating variable with no election, using pivot_longer to get attributes in the
 # same column, and creating a percentage variable
 no_election_yr <- youtube %>%

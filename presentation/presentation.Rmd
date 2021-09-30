@@ -1,7 +1,7 @@
 ---
-title: "Presentation title"
-subtitle: "Presentation subtitle (if any)"
-author: "Team name <br> Names of team members"
+title: "Investigating content and audience reactions to youtube Super Bowl commercials"
+subtitle: "(2000 to 2020)"
+author: "R_mageddon <br> Yihan Shi, Holly, Cui, Raffay Rana"
 institute: "Duke University"
 date: "`r Sys.Date()`"
 output:
@@ -32,6 +32,7 @@ library(tidytext)
 library(syuzhet)
 library(stringr)
 library(textdata)
+library(hrbrthemes)
 library(scales)
 ```
 
@@ -63,41 +64,199 @@ class: inverse, middle, center
 
 ---
 
-## xaringan
+## Introduction
 
-- The presentation is created using the `xaringan` package
+- Many things have changed in the first 20 years of the 21st century, such as 
+life science breakthroughs, political conflicts, feminist movements, etc.
 
-- Use `---` to separate slides and `--` for incremental builds
-
---
-
-- Like this
+- Could the characteristics of Super Bowl commercials give us some insights about
+such changes?
 
 ---
 
-## Layouts
 
-You can use plain text
+## Any trends in how the ads change over the years in terms of content, audience preferences and engagement?
 
-- or bullet points
+```{r STACKED-BAR-CHART, echo = FALSE, warning = FALSE}
+youtube1 <- youtube
 
-.pull-left[
-or text in two columns $^*$
-]
-.pull-right[
-- like
-- this
-]
+# First, create a function that returns total count of a specific feature in one year.
+count_feature_number <- function(data, feature_name, desired_year){
+  count1 = 0
+  for (i in seq(1, nrow(data))){
+    if (data$year[i] == desired_year){
+      if (data[i, feature_name] == TRUE){
+        count1 = count1 + 1
+      }
+    }
+  }
+  return(count1)
+}
 
-.footnote[
-[*] And add footnotes
-]
+
+# With help from the counter above, we define a new function that creates a 
+## generalized feature counting dataframe for a single year.
+generator <- function(data, year){
+  funny_count = count_feature_number(data, "funny", year) 
+  show_quickly_count = count_feature_number(data, "show_product_quickly", year)
+  patriotic_count = count_feature_number(data, "patriotic", year)
+  celebrity_count = count_feature_number(data, "celebrity", year)
+  danger_count = count_feature_number(data, "danger", year)
+  animals_count = count_feature_number(data, "animals", year)
+  use_sex_count = count_feature_number(data, "use_sex", year)
+  
+  year_value <- rep(year, 7)
+  count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
+                        celebrity_count, danger_count, animals_count, use_sex_count)
+  features <- c("funny", "show_product_quickly", "patriotic", 
+                "celebrity", "danger", "animals", "use_sex")
+  year_table <- cbind(year_value, count_of_feature, features)
+  year_df <- as.data.frame(year_table)
+  return(year_df)
+}
+
+
+# Then, using the "appender" function below to get the final dataframe for 
+## all years from 2000 to 2020. 
+appender <- function(data){
+  year_general_df <- generator(data, 2000)
+  for (j in seq(2001, 2020)){
+    year_general_df <- rbind(year_general_df, 
+                             generator(data, j))
+  }
+  return(year_general_df)
+}
+
+
+# Use the function and get our desired plot
+year_feature_df <- appender(youtube1)
+
+year_feature <- year_feature_df %>%
+  mutate(
+    year_value = as.numeric(as.character(year_value)),
+    count_of_feature = as.numeric(as.character(count_of_feature))
+  ) %>%
+  group_by(year_value, features) %>%
+  summarise(n = sum(count_of_feature)) %>%
+  mutate(percentage = n / sum(n))
+```
+
+
+```{r plotting stacked area chart, warning = FALSE, out.width = "70%", fig.height = 5, fig.width = 7, echo = FALSE}
+# Plot stacked area chart
+ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
+    geom_area(alpha=0.6 , size=.5, colour="white") +
+    labs(
+      x = "Year", 
+      y = "Percentage", 
+      fill = "Features",
+      title = "Percentage comparison among video features in\nSuperbowl commercials over years (2000~2020)",
+      subtitle = "By video features"
+    ) + 
+    theme_ipsum() +
+    theme(
+      plot.title = element_text(hjust = 0, size = 13)
+    )
+```
+---
+
+### What feature make the audience wants to hit 'like'?
+
+```{r wrangling_function, echo = FALSE, warning = FALSE}
+# create compare function for different categories
+create_compare <- function(varname, full_data) {
+  full_data <- full_data %>% 
+    # drop N/A value for key variables 
+    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
+    # create new variables for preference, dislike, engagement, and features
+    mutate(like = like_count / view_count,
+           dislike = dislike_count / view_count,
+           engage = comment_count / view_count,
+           feature = as_label(enquo(varname))) %>% 
+    select({{varname}}, like, dislike, engage, feature, year) %>%
+    rename(val = as_label(enquo(varname)))
+  return(full_data)
+}
+
+# create a new data frame that contains key variables from above 
+all_compare <- rbind(create_compare(funny, youtube),
+                     create_compare(danger, youtube),
+                     create_compare(show_product_quickly, youtube),
+                     create_compare(patriotic, youtube),
+                     create_compare(celebrity, youtube),
+                     create_compare(animals, youtube),
+                     create_compare(use_sex, youtube)) %>% 
+  # change variable names to be more readable
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality')) %>% 
+  group_by(year, feature, val) %>% 
+  summarise(mean_like = mean(like),
+            mean_engage = mean(engage))
+```
+
+
+```{r plot-compare, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE, message=FALSE}
+# Code hidden with echo = FALSE
+# Uses modified penguins dataset from previous chunk
+# Play around with height and width until you're happy with the look
+
+ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
+  geom_line(aes(color = val)) + 
+  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+       subtitle = "By video features and year",
+       x = "Year of Superbowl",
+       y = "Average ratio of likes over views") +
+  facet_wrap(~feature) +
+  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  theme_minimal() +
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(margin = margin(r = 20),
+                                    hjust = 0.5),
+        panel.spacing = unit(1.5, "lines"),
+        legend.position = c(0.95, 0.1),
+        legend.title = element_blank())
+```
 
 ---
-## What words appear more in election and non-election years? 
+
+## What feature make the audience wants to comment?
+
+```{r engagement_plot, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE}
+ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
+  geom_line(aes(color = val)) + 
+  labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+       subtitle = "By video features and year",
+       x = "Year of Superbowl",
+       y = "Average ratio of comments over views") +
+  facet_wrap(~feature) +
+  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  theme_minimal() +
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(margin = margin(r = 20),
+                                    hjust = 0.5),
+        panel.spacing = unit(1.5, "lines"),
+        legend.position = c(0.95, 0.1),
+        legend.title = element_blank())
+```
+
+
+---
+
+## How do election year ads differ from non-election year ads in terms of content and description?
 
 .pull-left[
-``` {r data-prep-election-wordcloud, echo = FALSE}
+``` {r data-prep-election-wordcloud, echo = FALSE, warning = FALSE}
 # Election years in the dataset
 election_year <- c(2000, 2004, 2008, 2012, 2016, 2020)
 # Adding an election year variable
@@ -133,7 +292,7 @@ election_df <- election_df %>%
   mutate(sentiment = get_sentiment(word,"syuzhet"))
 ```
 
-``` {r election-wordcloud-viz, warning = FALSE, out.width = "60%", fig.width = 8, echo = FALSE}
+``` {r election-wordcloud-viz, warning = FALSE, out.width = "90%", fig.width = 8, fig.height = 9, echo = FALSE}
 election_df %>%
   ggplot(aes(
     label = word,
@@ -154,7 +313,7 @@ election_df %>%
 ```
 ]
 .pull-right[
-```{r non-election-wordcloud-data-prep,echo = FALSE}
+```{r non-election-wordcloud-data-prep, echo = FALSE, warning = FALSE}
 # Isolating the title variable
 no_election_title <- youtube %>%
   filter(election_years == 0) %>%
@@ -191,12 +350,10 @@ non_election_df <- non_election_df %>%
   mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
   filter(freq >= 2) %>% 
   mutate(sentiment = get_sentiment(word,"syuzhet"))
-
-
 ```
 
 
-``` {r non-election-wordcloud-viz, warning = FALSE, out.width = "60%", fig.width = 8, echo = FALSE}
+``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 8, fig.height = 9, echo = FALSE, warning = FALSE}
 non_election_df %>% 
   ggplot(aes(
     label = word,
@@ -218,113 +375,71 @@ non_election_df %>%
 
 ---
 
-## What feature make the audience wants to hit 'like'?
+### Based on the two word clouds above...
 
-```{r wrangling_function, echo = FALSE}
-# create compare function for different categories
-create_compare <- function(varname, full_data) {
-  full_data <- full_data %>% 
-    # drop N/A value for key variables 
-    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
-    # create new variables for preference, dislike, engagement, and features
-    mutate(like = like_count / view_count,
-           dislike = dislike_count / view_count,
-           engage = comment_count / view_count,
-           feature = as_label(enquo(varname))) %>% 
-    select({{varname}}, like, dislike, engage, feature, year) %>%
-    rename(val = as_label(enquo(varname)))
-  return(full_data)
-}
+``` {r election-col, echo = FALSE, warning = FALSE}
+# Creating variable with election, using pivot_longer to get attributes in the
+# same column, and creating a percentage variable
+election_yr <- youtube %>%
+  pivot_longer(cols = c(use_sex, funny, celebrity, patriotic, danger, animals)) %>%
+  filter(election_years == 1) %>%
+  filter(value == TRUE) %>%
+  group_by(name) %>%
+  summarise(n = n()) %>%
+  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
 ```
 
-```{r create new table, echo = FALSE}
-# create a new data frame that contains key variables from above 
-all_compare <- rbind(create_compare(funny, youtube),
-                     create_compare(danger, youtube),
-                     create_compare(show_product_quickly, youtube),
-                     create_compare(patriotic, youtube),
-                     create_compare(celebrity, youtube),
-                     create_compare(animals, youtube),
-                     create_compare(use_sex, youtube)) %>% 
-  # change variable names to be more readable
-  mutate(feature = recode(feature, 'animals' = 'Animals', 
-                          'celebrity' = 'Celebrity', 
-                          'danger' = 'Danger',
-                          'funny' = 'Funny',
-                          'patriotic' = 'Patriotic',
-                          'show_product_quickly' = 'Show product quickly',
-                          'use_sex' = 'Use sexuality'))
+.pull-left[
+``` {r election-col-plot, out.width = "90%", fig.width = 9, fig.height = 8, echo = FALSE, warning = FALSE}
+# Creating the plot
+election_yr %>%
+  ggplot(aes(y = name, x = n, fill = name)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = perc, color = name), nudge_x = 2, show.legend = FALSE) +
+  labs(
+    x = "Count",
+    y = "Ad Attribute",
+    title = "Count and Proportion of Ad by Attribute",
+    subtitle = "In Election Years"
+  ) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_minimal()
+```
+]
+
+```{r non-election-col, echo = FALSE, warning = FALSE}
+# Creating variable with no election, using pivot_longer to get attributes in the
+# same column, and creating a percentage variable
+no_election_yr <- youtube %>%
+  pivot_longer(cols = c(use_sex, funny, celebrity, patriotic, danger, animals)) %>%
+  filter(election_years == 0) %>%
+  filter(value == TRUE) %>%
+  group_by(name) %>%
+  summarise(n = n()) %>%
+  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
 ```
 
-```{r recode-features, echo = FALSE, warning = FALSE}
-# In this chunk I'm doing a bunch of analysis that I don't want to present 
-# in my slides. But I need the resulting data frame for a plot I want to present.
-
-# create new dataset for facetting
-feature_over_years <- all_compare %>% 
-  mutate(feature = recode(feature, 'animals' = 'Animals', 
-                          'celebrity' = 'Celebrity', 
-                          'danger' = 'Danger',
-                          'funny' = 'Funny',
-                          'patriotic' = 'Patriotic',
-                          'show_product_quickly' = 'Show product quickly',
-                          'use_sex' = 'Use sexuality')) %>% 
-  group_by(year, feature, val) %>% 
-  summarise(mean_like = mean(like),
-            mean_engage = mean(engage))
+.pull-right[
+```{r non-election-col-plot, out.width = "90%", fig.width = 9, fig.height = 8, echo = FALSE, warning = FALSE}
+# No Election year col vizualization
+no_election_yr %>%
+  ggplot(aes(y = name, x = n, fill = name)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = perc, color = name), nudge_x = 4, show.legend = FALSE) +
+  labs(
+    x = "Count",
+    y = "Ad Attribute",
+    title = "Count and Proportion of Ad by Attribute",
+    subtitle = "In Non-Election Years"
+  ) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_minimal()
 ```
-
-```{r plot-compare, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE}
-# Code hidden with echo = FALSE
-# Uses modified penguins dataset from previous chunk
-# Play around with height and width until you're happy with the look
-
-ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) + 
-  geom_line(aes(color = val)) + 
-  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video features and year",
-       x = "Year of Superbowl",
-       y = "Average ratio of likes over views") +
-  facet_wrap(~feature) +
-  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
-  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
-  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
-  theme_minimal() +
-  theme(axis.title.x = element_text(hjust = 0.5),
-        axis.title.y = element_text(margin = margin(r = 20),
-                                    hjust = 0.5),
-        panel.spacing = unit(1.5, "lines"),
-        legend.position = c(0.95, 0.1),
-        legend.title = element_blank())
-```
-
+]
 ---
 
-## What feature make the audience wants to comment?
-
-```{r engagement_plot, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE}
-ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_engage)) + 
-  geom_line(aes(color = val)) + 
-  labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video features and year",
-       x = "Year of Superbowl",
-       y = "Average ratio of comments over views") +
-  facet_wrap(~feature) +
-  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
-  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
-  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
-  theme_minimal() +
-  theme(axis.title.x = element_text(hjust = 0.5),
-        axis.title.y = element_text(margin = margin(r = 20),
-                                    hjust = 0.5),
-        panel.spacing = unit(1.5, "lines"),
-        legend.position = c(0.95, 0.1),
-        legend.title = element_blank())
-```
-
----
 ## Plot and text
 
 .pull-left[
@@ -332,13 +447,6 @@ ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_engage)) +
 - goes here
 ]
 .pull-right[
-```{r warning=FALSE, out.width="100%", fig.width=4, echo=FALSE}
-# see how I changed out.width and fig.width from defaults
-# to make the figure bigger
-ggplot(penguins, aes(x = bill_length_mm, y = species, color = species)) +
-  geom_boxplot() +
-  theme_minimal()
-```
 ]
 
 ---
@@ -346,16 +454,6 @@ ggplot(penguins, aes(x = bill_length_mm, y = species, color = species)) +
 class: inverse, middle, center
 
 # A new section...
-
----
-
-## Tables
-
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
-
-```{r penguins-table, echo = FALSE}
-kable(head(penguins), format = "html")
-```
 
 ---
 
