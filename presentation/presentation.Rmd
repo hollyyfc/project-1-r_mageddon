@@ -77,7 +77,6 @@ such changes?
 ## Any trends in how the ads change over the years in terms of content, audience preferences and engagement?
 
 ```{r STACKED-BAR-CHART, echo = FALSE, warning = FALSE, message=FALSE}
-youtube1 <- youtube
 
 # First, create a function that returns total count of a specific feature in one year.
 count_feature_number <- function(data, feature_name, desired_year){
@@ -107,8 +106,8 @@ generator <- function(data, year){
   year_value <- rep(year, 7)
   count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
                         celebrity_count, danger_count, animals_count, use_sex_count)
-  features <- c("funny", "show_product_quickly", "patriotic", 
-                "celebrity", "danger", "animals", "use_sex")
+  features <- c("Funny", "Show product quickly", "Patriotic", 
+                "Celebrity", "Danger", "Animals", "Use sex")
   year_table <- cbind(year_value, count_of_feature, features)
   year_df <- as.data.frame(year_table)
   return(year_df)
