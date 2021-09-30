@@ -29,25 +29,24 @@ youtube <- readr::read_csv('data/youtube.csv', show_col_types = FALSE)
 ## Introduction
 
 The `youtube` dataset contains a list of ads from the 10 brands that had the most
-advertisements in Super Bowls from 2000 to 2020, according to data from superbowl-ads.com, 
-with matching videos found on YouTube. It was then analyzed by FiveThirtyEight 
-staffers to come up with seven defining characteristics of a Super Bowl ad:
-`funny`, `danger`, `use_sex`, `show_product_quickly`, `celebrity`, `patriotic`,
-`animals`.
+advertisements in Super Bowls from 2000 to 2020, according to data from 
+superbowl-ads.com, with matching videos found on YouTube. It was then analyzed 
+by FiveThirtyEight staffers to come up with seven defining characteristics of 
+a Super Bowl ad: `funny`, `danger`, `use_sex`, `show_product_quickly`, 
+`celebrity`, `patriotic`, `animals`.
 
 
 
-## Question 1：What's the trend in the ads' content, audience preferences, and
-engagement over the years?
+## Question 1：What's the trend in the ads' content, audience preferences, and engagement over the years?
 
 ### Introduction
 
 We want to explore the trends in how the ads change over the years in terms of 
 content, audience preferences, and engagement. To analyze the change in content 
-we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`,
-`celebrity`, and `animals`. To explore audience preference and engagement,
-`like_count`, `comment_count`, and `view_count` are used to calculate ratio of 
-like/engagement over total views.
+we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,
+`show_product_quickly`, `celebrity`, and `animals`. To explore audience 
+preference and engagement,`like_count`, `comment_count`, and `view_count` are 
+used to calculate ratio of like/engagement over total views.
 
 Many things have changed in the first 20 years of the 21st century. There are 
 life science breakthroughs, political conflicts, feminist movements, etc. 
@@ -58,21 +57,20 @@ ads themselves may also tell how companies are reacting to audience preferences.
 
 ### Approach
 
-(Why stacked area graph better?)
-We also used a stacked area chart to see how the proportion of each feature change
-over the years. A stacked area chart is similarly plotted as a stacked bar plot, but with
-lines connecting the elements with same group, which is visually compatible when we plan to 
-have year (time variable) as our x axis. More specifically, over the years on the x axis, we 
-can see the relative percentage change of each video feature on the y axis with areas divided 
-by lines linking them together. The percentage, or proportion, of each feature is calculated
-by first counting the total number of TRUE-valued Boolean variable in each year ("funny", 
-"patriotic", etc.), and then generate a dataframe with all 21 years together. 
+First, we used a stacked area chart to see how the proportion of each video 
+feature changes over years. Here, a stacked area chart is used because with 
+continuous lines connecting and separating the elements in same group, it is 
+visually compatible when we plan to have year (a time variable) as our x axis.
+More specifically, over the years on the x axis, we can compare the relative 
+percentage change of each feature on the y axis with areas divided by lines 
+while also linking them together.
 
-First, we used a line graphs faceted by `feature`, a variable that is created using
-all logical variables in the data set. The faceted line graph is suitable for time-dependent
-changes by each categorical variable. Because the logical variables are either true or
-false, 2 different lines in each sub-plot clearly show how the trends (audience
-preference in this case) differ if an ad contains a feature or not.
+For the second plot, we used a line graphs faceted by `feature`, a variable 
+that is created using all logical variables in the data set. The faceted line
+graph is suitable for time-dependent changes by each categorical variable. 
+Because the logical variables are either true or false, 2 different lines in 
+each sub-plot clearly show how the trends (audience preference in this case) 
+differ if an ad contains a feature or not.
 
 ### Analysis
 
@@ -102,7 +100,8 @@ generator <- function(data, year){
   
   year_value <- rep(year, 7)
   count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
-                        celebrity_count, danger_count, animals_count, use_sex_count)
+                        celebrity_count, danger_count, animals_count, 
+                        use_sex_count)
   features <- c("funny", "show_product_quickly", "patriotic", 
                 "celebrity", "danger", "animals", "use_sex")
   year_table <- cbind(year_value, count_of_feature, features)
@@ -133,6 +132,11 @@ year_feature
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
+    scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, 
+                                              prefix = "", suffix = "%", 
+                                              big.mark = " ", 
+                                              decimal.mark = ".", 
+                                              trim = TRUE)) +
     labs(
       x = "Year", 
       y = "Percentage", 
@@ -141,6 +145,7 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
       subtitle = "By video features"
     ) + 
     theme_ipsum() +
+    scale_fill_brewer(palette = "Dark2") +
     theme(
       plot.title = element_text(hjust = 0, size = 13)
     )
@@ -234,17 +239,30 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) +
 
 ### Discussion
 
-First, we look at audience preference of various features in ads. From 2000 to 
-2020, the ads that contain dangerous elements are getting more likes than ads that
-do not contain dangerous elements. There is no obvious trend that the audience
-strongly prefer a specific feature other than `danger` over the years.In certain 
-years, audience feel strongly about ads that contain specific features.
-In 2010, ads that contain `animals` element are liked more than 3 times compared 
-to ads that do not contain animals. Same observation is shown for ads containing
-`patriotic` element in 2010. However, from 2017 to 2020, ads that
-contain `patriotic` content become less liked. Ads that use sexuality are far more
-liked in 2004 but are less liked in 2015. In 2002, the ads that have no humorous 
-element are liked almost 3 times as ads that have humorous element. 
+In the stacked area chart, the percentage or proportion of each video feature is 
+calculated by first counting the total number of TRUE-valued Boolean variable in 
+each year ("funny", "patriotic", etc.), and then generate a dataframe with all 21 
+years together. Thus, we should focus on the width of each color bands, instead 
+of trying to interpret the lines. Here, we can see that over the years, `funny` 
+and `show_product_quickly` take up the highest proportion among the seven video 
+features. However, both of them are showing a decreasing trend when it's around
+2020. In fact, other features, such as `patriotic` and `use_sex`, experiences 
+decreases recently. And `celebrity` is, nevertheless, having an increasing 
+relative proportion. Feature `patriotic` takes up the least proportion overall,
+but it reaches its peak proportion around 2017. 
+
+For line plots, we first look at audience preference of various features in ads. 
+From 2000 to 2020, the ads that contain dangerous elements are getting more likes 
+than ads thatdo not contain dangerous elements. There is no obvious trend that 
+the audience strongly prefer a specific feature other than `danger` over the 
+years.In certain years, audience feel strongly about ads that contain specific 
+features. In 2010, ads that contain `animals` element are liked more than 3 
+times compared to ads that do not contain animals. Same observation is shown 
+for ads containing `patriotic` element in 2010. However, from 2017 to 2020, 
+ads that contain `patriotic` content become less liked. Ads that use sexuality 
+are far more liked in 2004 but are less liked in 2015. In 2002, the ads that 
+have no humorous element are liked almost 3 times as ads that have humorous 
+element. 
 
 Then, we look at what kinds of ads elicit the audience to engage by commenting.
 In general, the engagement rate is pretty low. Most ads receive almost no comments.
@@ -260,7 +278,9 @@ Furthermore, the youtube videos have been collected from random Youtube users
 instead of influncers or offial commercial accounts. Therefore, the views, likes,
 and engagement also depend on the account itself.
 
-## Question 2 <- Update title to relate to the question you’re answering
+
+
+## Question 2 <- 2. How do election year ads differ from non-election year ads in terms of content and description?
 
 ### Introduction
 
