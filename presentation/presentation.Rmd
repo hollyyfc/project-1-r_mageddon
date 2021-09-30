@@ -74,10 +74,9 @@ such changes?
 
 ---
 
-
 ## Any trends in how the ads change over the years in terms of content, audience preferences and engagement?
 
-```{r STACKED-BAR-CHART, echo = FALSE, warning = FALSE}
+```{r STACKED-BAR-CHART, echo = FALSE, warning = FALSE, message=FALSE}
 youtube1 <- youtube
 
 # First, create a function that returns total count of a specific feature in one year.
@@ -142,7 +141,7 @@ year_feature <- year_feature_df %>%
 ```
 
 
-```{r plotting stacked area chart, warning = FALSE, out.width = "70%", fig.height = 5, fig.width = 7, echo = FALSE}
+```{r plotting stacked area chart, warning = FALSE, out.width = "60%", fig.height = 5, fig.width = 7, echo = FALSE}
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
@@ -162,7 +161,7 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
 
 ### What feature make the audience wants to hit 'like'?
 
-```{r wrangling_function, echo = FALSE, warning = FALSE}
+```{r wrangling_function, echo = FALSE, warning = FALSE, message=FALSE}
 # create compare function for different categories
 create_compare <- function(varname, full_data) {
   full_data <- full_data %>% 
