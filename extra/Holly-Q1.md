@@ -11,12 +11,17 @@ question.
 
 ### Approach
 
-Describe what types of plots you are going to make to address your
-question. For each plot, provide a clear explanation as to why this plot
-(e.g. boxplot, barplot, histogram, etc.) is best for providing the
-information you are asking about. The two plots should be of different
-types, and at least one of the two plots needs to use either color
-mapping or facets.
+…We also used a stacked area chart to see how the proportion of each
+feature change over the years. A stacked area chart is similarly plotted
+as a stacked bar plot, but with lines connecting the elements with same
+group, which is visually compatible when we plan to have year(time
+variable) as our x axis. More specifically, over the years on the x
+axis, we can see the relative percentage change of each video feature on
+the y axis with areas divided by lines linking them together. The
+percentage, or proportion, of each feature is calculated by first
+counting the total number of TRUE-valued Boolean variable in each year
+(“funny”, “patriotic”, etc.), and then generate a dataframe with all
+21 years together.
 
 ``` r
 library(tidyverse)
@@ -66,6 +71,8 @@ library(hrbrthemes)
 youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
 youtube1 <- youtube
 ```
+
+### Analysis
 
 ``` r
 # First, create a function that returns total count of a specific feature in one year.
@@ -325,9 +332,9 @@ ggplot(youtube_pie_df, aes(x="", y=count, fill=category)) +
 
 ![](Holly-Q1_files/figure-gfm/PIE-CHART-1.png)<!-- -->
 
-### Analysis
-
-provide the code that generates your plots. Use scale functions to
-provide nice axis labels and guides.
-
 ### Discussion
+
+In the stacked area plot, we should focus on the width of each color
+bands, instead of trying to interpret the lines. Here, we can see that
+over the years, `funny` and `show_product_quickly` take up the highest
+proportion among the seven video features.
