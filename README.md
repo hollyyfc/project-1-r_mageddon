@@ -64,15 +64,23 @@ by R-Mageddon
 
 ## Introduction
 
+<<<<<<< HEAD
 Our `youtube` dataset contains a list of ads from the 10 brands that had
+=======
+The `youtube` dataset contains a list of ads from the 10 brands that had
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 the most advertisements in Super Bowls from 2000 to 2020, according to
 data from superbowl-ads.com, with matching videos found on YouTube. It
 was then analyzed by FiveThirtyEight staffers to come up with seven
 defining characteristics of a Super Bowl ad: `funny`, `danger`,
+<<<<<<< HEAD
 `use_sex`, `show_product_quickly`, `celebrity`, `patriotic`, `animals`,
 which are represented as boolean variables. Furthermore, we are also
 given the `view_count`, `like_count`, `dislike_count`, `favorite_count`,
 `comment_count`, `description`, and `title` for each ad.
+=======
+`use_sex`, `show_product_quickly`, `celebrity`, `patriotic`, `animals`.
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 
 ## Question 1：What’s the trend in the ads’ content, audience preferences, and engagement over the years?
 
@@ -113,6 +121,11 @@ not.
 
 ### Analysis
 
+<<<<<<< HEAD
+=======
+Plot 1:
+
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 ``` r
 # First, create a function that returns total count of a specific feature in one year.
 count_feature_number <- function(data, feature_name, desired_year){
@@ -126,6 +139,12 @@ count_feature_number <- function(data, feature_name, desired_year){
   }
   return(count1)
 }
+<<<<<<< HEAD
+=======
+```
+
+``` r
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 # With help from the counter above, we define a new function that creates a 
 ## generalized feature counting dataframe for a single year.
 generator <- function(data, year){
@@ -147,6 +166,12 @@ generator <- function(data, year){
   year_df <- as.data.frame(year_table)
   return(year_df)
 }
+<<<<<<< HEAD
+=======
+```
+
+``` r
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 # Then, using the "appender" function below to get the final dataframe for 
 ## all years from 2000 to 2020. 
 appender <- function(data){
@@ -157,9 +182,17 @@ appender <- function(data){
   }
   return(year_general_df)
 }
+<<<<<<< HEAD
 # Use the function and get our desired plot
 youtube1 <- youtube
 year_feature_df <- appender(youtube1)
+=======
+```
+
+``` r
+# Use the function and get our desired plot
+year_feature_df <- appender(youtube)
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 year_feature <- year_feature_df %>%
   mutate(
     year_value = as.numeric(as.character(year_value)),
@@ -173,6 +206,7 @@ year_feature <- year_feature_df %>%
     ## `summarise()` has grouped output by 'year_value'. You can override using the `.groups` argument.
 
 ``` r
+<<<<<<< HEAD
 year_feature
 ```
 
@@ -193,6 +227,8 @@ year_feature
     ## # … with 137 more rows
 
 ``` r
+=======
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
@@ -217,9 +253,16 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
 
 ![](README_files/figure-gfm/STACKED-BAR-CHART-1.png)<!-- -->
 
+<<<<<<< HEAD
 ``` r
 # create compare function for different 
 # Function was written with the help of TA
+=======
+Plot 2:
+
+``` r
+# create compare function for different categories
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 create_compare <- function(varname, full_data) {
   full_data <- full_data %>% 
     # drop N/A value for key variables 
@@ -235,6 +278,11 @@ create_compare <- function(varname, full_data) {
 }
 ```
 
+<<<<<<< HEAD
+=======
+(Function was written with the help of TA)
+
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 ``` r
 # create a new data frame that contains key variables from above 
 all_compare <- rbind(create_compare(funny, youtube),
@@ -342,6 +390,7 @@ that contain `patriotic` content become less liked. Ads that use
 sexuality are far more liked in 2004 but are less liked in 2015. In
 2002, the ads that have no humorous element are liked almost 3 times as
 ads that have humorous element.
+<<<<<<< HEAD
 
 Then, we look at what kinds of ads elicit the audience to engage by
 commenting. In general, the engagement rate is pretty low. Most ads
@@ -360,6 +409,26 @@ commercial accounts. Therefore, the views, likes, and engagement also
 depend on the account itself.
 
 ## Question 2 How do election year ads differ from non-election year ads in terms of content and description?
+=======
+
+Then, we look at what kinds of ads elicit the audience to engage by
+commenting. In general, the engagement rate is pretty low. Most ads
+receive almost no comments. However, in 2004 specifically there is are
+significant differences between engagement rate for all features. Ads
+that contain `animal`, `funny`, show product quickly, or use sexuality
+shows higher engagement compared the ads that don’t contain these
+features. On the other hand, ads that don’t contain `celebrity`,
+`patriotic`, or `danger` tend to have higher engagement rates.
+
+The year variable used here denotes the Superbowl year where the
+commercial was shown. However, some commercials have a different
+published date on Youtube. Furthermore, the youtube videos have been
+collected from random Youtube users instead of influncers or offial
+commercial accounts. Therefore, the views, likes, and engagement also
+depend on the account itself.
+
+## Question 2: How do election year ads differ from non-election year ads in terms of content and description?
+>>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 
 ### Introduction
 
