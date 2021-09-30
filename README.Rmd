@@ -23,7 +23,6 @@ library(textdata)
 
 ```{r load-data, echo = FALSE}
 # load data here
-
 youtube <- readr::read_csv('data/youtube.csv', show_col_types = FALSE)
 ```
 
@@ -39,22 +38,23 @@ Imagine that your project is a standalone document and the grader has no prior k
 ### Introduction
 
 We want to explore the trends in how the ads change over the years in terms of content, 
-audience preferences, and engagement. To analyze the change in content we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`, `celebrity`, and `animals`. To explore audience preference and engagement,
-`like_count`, `comment_count`, and `view_count` are used to calculate ratio of like/engagement over total views.
+audience preferences, and engagement. To analyze the change in content we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`, `celebrity`, and `animals`. 
+To explore audience preference and engagement, `like_count`, `comment_count`, and `view_count` are 
+used to calculate ratio of like/engagement over total views.
 
-Many things have changed in the first 20 years of the 21st century. There are life science breakthroughs, political conflicts, feminist movements, etc. Therefore, we want to see if people’s reaction to Super Bowl commercials reflect the changes in their lifestyles and thoughts over the years. The changes in the ads themselves may also tell how companies are reacting to audience preferences.
+Many things have changed in the first 20 years of the 21st century. There are life science breakthroughs, 
+political conflicts, feminist movements, etc. Therefore, we want to see if people’s reaction to Super Bowl 
+commercials reflect the changes in their lifestyles and thoughts over the years. The changes in the ads 
+themselves may also tell how companies are reacting to audience preferences.
 
 ### Approach
 
-(Why stacked area graph better?)
-We also used a stacked area chart to see how the proportion of each feature change
-over the years. A stacked area chart is similarly plotted as a stacked bar plot, but with
-lines connecting the elements with same group, which is visually compatible when we plan to 
-have year (time variable) as our x axis. More specifically, over the years on the x axis, we 
-can see the relative percentage change of each video feature on the y axis with areas divided 
-by lines linking them together. The percentage, or proportion, of each feature is calculated
-by first counting the total number of TRUE-valued Boolean variable in each year ("funny", 
-"patriotic", etc.), and then generate a dataframe with all 21 years together. 
+We first used a stacked area chart to see how the proportion of each video feature changes
+over years. Here, a stacked area chart is used because, with continuous lines connecting 
+and separating the elements in same group, it is visually compatible when we plan to have year 
+(a time variable) as our x axis. More specifically, over the years on the x axis, we can compare 
+the relative percentage change of each feature on the y axis with areas divided 
+by lines linking them together.
 
 First, we used a line graphs faceted by `feature`, a variable that is created using
 all logical variables in the data set. The faceted line graph is suitable for time-dependent
@@ -65,6 +65,7 @@ preference in this case) differ if an ad contains a feature or not.
 ### Analysis
 
 ```{r STACKED-BAR-CHART}
+
 # First, create a function that returns total count of a specific feature in one year.
 count_feature_number <- function(data, feature_name, desired_year){
   count1 = 0
@@ -114,7 +115,7 @@ appender <- function(data){
 
 
 # Use the function and get our desired plot
-year_feature_df <- appender(youtube1)
+year_feature_df <- appender(youtube)
 
 year_feature <- year_feature_df %>%
   mutate(
@@ -125,7 +126,6 @@ year_feature <- year_feature_df %>%
   summarise(n = sum(count_of_feature)) %>%
   mutate(percentage = n / sum(n))
 
-year_feature
 
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
@@ -273,6 +273,14 @@ ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_engage)) +
 
 ### Discussion
 
+The percentage, or proportion, of each feature is calculated
+by first counting the total number of TRUE-valued Boolean variable in each year ("funny", 
+"patriotic", etc.), and then generate a dataframe with all 21 years together. In the stacked area plot, we should focus on the width of each color bands, instead
+of trying to interpret the lines. Here, we can see that over the years, `funny` and 
+`show_product_quickly` take up the highest proportion among the seven video features.
+
+
+
 First, we look at audience preference of various features in ads. From 2000 to 
 2020, the ads that contain dangerous elements are getting more likes than ads that
 do not contain dangerous elements. There is no obvious trend that the audience
@@ -298,6 +306,8 @@ shown. However, some commercials have a different published date on Youtube.
 Furthermore, the youtube videos have been collected from random Youtube users 
 instead of influncers or offial commercial accounts. Therefore, the views, likes,
 and engagement also depend on the account itself.
+
+
 
 ## Question 2 <- Update title to relate to the question you’re answering
 
@@ -518,5 +528,5 @@ See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on prop
 If you got your data off the web, make sure to note the retrieval date.
 
 ## References
-
+https://www.r-graph-gallery.com/136-stacked-area-chart
 https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html
