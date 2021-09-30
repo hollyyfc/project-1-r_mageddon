@@ -23,26 +23,38 @@ library(textdata)
 
 ```{r load-data, echo = FALSE}
 # load data here
-
 youtube <- readr::read_csv('data/youtube.csv', show_col_types = FALSE)
 ```
 
 ## Introduction
 
-(1-2 paragraphs)
-Brief introduction to the dataset.
-You may repeat some of the information about the dataset provided in the introduction to the dataset on the TidyTuesday repository, paraphrasing on your own terms.
-Imagine that your project is a standalone document and the grader has no prior knowledge of the dataset.
+The `youtube` dataset contains a list of ads from the 10 brands that had the most
+advertisements in Super Bowls from 2000 to 2020, according to data from superbowl-ads.com, 
+with matching videos found on YouTube. It was then analyzed by FiveThirtyEight 
+staffers to come up with seven defining characteristics of a Super Bowl ad:
+`funny`, `danger`, `use_sex`, `show_product_quickly`, `celebrity`, `patriotic`,
+`animals`.
 
-## Question 1 <- Update title to relate to the question you’re answering
+
+
+## Question 1：What's the trend in the ads' content, audience preferences, and
+engagement over the years?
 
 ### Introduction
 
-We want to explore the trends in how the ads change over the years in terms of content, 
-audience preferences, and engagement. To analyze the change in content we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`, `celebrity`, and `animals`. To explore audience preference and engagement,
-`like_count`, `comment_count`, and `view_count` are used to calculate ratio of like/engagement over total views.
+We want to explore the trends in how the ads change over the years in terms of 
+content, audience preferences, and engagement. To analyze the change in content 
+we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`,
+`celebrity`, and `animals`. To explore audience preference and engagement,
+`like_count`, `comment_count`, and `view_count` are used to calculate ratio of 
+like/engagement over total views.
 
-Many things have changed in the first 20 years of the 21st century. There are life science breakthroughs, political conflicts, feminist movements, etc. Therefore, we want to see if people’s reaction to Super Bowl commercials reflect the changes in their lifestyles and thoughts over the years. The changes in the ads themselves may also tell how companies are reacting to audience preferences.
+Many things have changed in the first 20 years of the 21st century. There are 
+life science breakthroughs, political conflicts, feminist movements, etc. 
+Therefore, we want to see if people’s reaction to Super Bowl commercials reflect 
+the changes in their lifestyles and thoughts over the years. The changes in the 
+ads themselves may also tell how companies are reacting to audience preferences.
+
 
 ### Approach
 
@@ -141,9 +153,6 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
     theme(
       plot.title = element_text(hjust = 0, size = 13)
     )
-  
-
-
 ```
 
 ```{r wrangling_function}
@@ -180,47 +189,6 @@ all_compare <- rbind(create_compare(funny, youtube),
                           'funny' = 'Funny',
                           'patriotic' = 'Patriotic',
                           'show_product_quickly' = 'Show product quickly',
-                          'use_sex' = 'Use sexuality'))
-```
-
-
-```{r plotting compare_like}
-like_plot <- ggplot(all_compare, aes(x = like, y = feature, color = val)) +
-  geom_boxplot(aes(color = val)) + 
-  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nOver all years from 2000 to 2020",
-       subtitle = "By video features",
-       x = "Ratio of like over views",
-       y = "Average rate of likes over views") +
-  scale_color_manual("Feature", values = c("#0047AB", "#FF0000")) +
-  theme_minimal()
-```
-
-
-```{r plotting compare_dislike}
-dislike_plot <- ggplot(all_compare, aes(x = dislike, y = feature, color = val)) +
-  geom_boxplot(aes(color = val)) + 
-  labs(title = "The rate of audience hitting 'dislike' for Youtube Superbowl Commercials\nOver all years from 2000 to 2020",
-       subtitle = "By video features",
-       x = "Ratio of dislike over views",
-       y = "Average rate of likes over views") +
-  scale_color_manual("Feature", values = c("#0047AB", "#FF0000")) +
-  theme_minimal()
-```
-
-```{r}
-like_plot
-dislike_plot
-```
-
-```{r create new dataset for facetting}
-# create new dataset for facetting
-feature_over_years <- all_compare %>% 
-  mutate(feature = recode(feature, 'animals' = 'Animals', 
-                          'celebrity' = 'Celebrity', 
-                          'danger' = 'Danger',
-                          'funny' = 'Funny',
-                          'patriotic' = 'Patriotic',
-                          'show_product_quickly' = 'Show product quickly',
                           'use_sex' = 'Use sexuality')) %>% 
   group_by(year, feature, val) %>% 
   summarise(mean_like = mean(like),
@@ -228,8 +196,8 @@ feature_over_years <- all_compare %>%
 ```
 
 
-```{r feature_over_years}
-ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) + 
+```{r all_compare}
+ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
   geom_line(aes(color = val)) + 
   labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video features and year",
@@ -251,7 +219,7 @@ ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_like)) +
 
 
 ```{r engagement_plot}
-ggplot(feature_over_years, aes(x = as.numeric(year), y = mean_engage)) + 
+ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
   geom_line(aes(color = val)) + 
   labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video features and year",
