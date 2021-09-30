@@ -19,6 +19,7 @@ library(tidytext)
 library(syuzhet)
 library(stringr)
 library(textdata)
+
 ```
 
 ```{r load-data, echo = FALSE}
@@ -29,16 +30,15 @@ youtube <- readr::read_csv('data/youtube.csv', show_col_types = FALSE)
 ## Introduction
 
 The `youtube` dataset contains a list of ads from the 10 brands that had the most
-advertisements in Super Bowls from 2000 to 2020, according to data from superbowl-ads.com, 
-with matching videos found on YouTube. It was then analyzed by FiveThirtyEight 
-staffers to come up with seven defining characteristics of a Super Bowl ad:
-`funny`, `danger`, `use_sex`, `show_product_quickly`, `celebrity`, `patriotic`,
-`animals`.
+advertisements in Super Bowls from 2000 to 2020, according to data from 
+superbowl-ads.com, with matching videos found on YouTube. It was then analyzed 
+by FiveThirtyEight staffers to come up with seven defining characteristics of 
+a Super Bowl ad: `funny`, `danger`, `use_sex`, `show_product_quickly`, 
+`celebrity`, `patriotic`, `animals`.
 
 
 
-## Question 1：What's the trend in the ads' content, audience preferences, and
-engagement over the years?
+## Question 1：What's the trend in the ads' content, audience preferences, and engagement over the years?
 
 ### Introduction
 Many things have changed in the first 20 years of the 21st century. There are 
@@ -49,10 +49,10 @@ ads themselves may also tell how companies are reacting to audience preferences.
 
 We want to explore the trends in how the ads change over the years in terms of 
 content, audience preferences, and engagement. To analyze the change in content 
-we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`,
-`celebrity`, and `animals`. To explore audience preference and engagement,
-`like_count`, `comment_count`, and `view_count` are used to calculate ratio of 
-like/engagement over total views.
+we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,
+`show_product_quickly`, `celebrity`, and `animals`. To explore audience 
+preference and engagement,`like_count`, `comment_count`, and `view_count` are 
+used to calculate ratio of like/engagement over total views.
 
 
 
@@ -75,9 +75,10 @@ changes by each category. Because the logical variables are either true or
 false, 2 different lines in each sub-plot clearly compare how the trends (audience
 preference in this case) differ if an ad contains a feature or not.
 
-### Analysis
 
-```{r STACKED-BAR-CHART}
+### Analysis
+Plot 1: 
+```{r counter}
 # First, create a function that returns total count of a specific feature in one year.
 count_feature_number <- function(data, feature_name, desired_year){
   count1 = 0
@@ -90,8 +91,9 @@ count_feature_number <- function(data, feature_name, desired_year){
   }
   return(count1)
 }
+```
 
-
+```{r generator}
 # With help from the counter above, we define a new function that creates a 
 ## generalized feature counting dataframe for a single year.
 generator <- function(data, year){
@@ -105,15 +107,17 @@ generator <- function(data, year){
   
   year_value <- rep(year, 7)
   count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
-                        celebrity_count, danger_count, animals_count, use_sex_count)
+                        celebrity_count, danger_count, animals_count, 
+                        use_sex_count)
   features <- c("funny", "show_product_quickly", "patriotic", 
                 "celebrity", "danger", "animals", "use_sex")
   year_table <- cbind(year_value, count_of_feature, features)
   year_df <- as.data.frame(year_table)
   return(year_df)
 }
+```
 
-
+```{r appender}
 # Then, using the "appender" function below to get the final dataframe for 
 ## all years from 2000 to 2020. 
 appender <- function(data){
@@ -124,11 +128,11 @@ appender <- function(data){
   }
   return(year_general_df)
 }
+```
 
-
+```{r STACKED-BAR-CHART}
 # Use the function and get our desired plot
-year_feature_df <- appender(youtube1)
-
+year_feature_df <- appender(youtube)
 year_feature <- year_feature_df %>%
   mutate(
     year_value = as.numeric(as.character(year_value)),
@@ -138,11 +142,14 @@ year_feature <- year_feature_df %>%
   summarise(n = sum(count_of_feature)) %>%
   mutate(percentage = n / sum(n))
 
-year_feature
-
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
+    scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, 
+                                              prefix = "", suffix = "%", 
+                                              big.mark = " ", 
+                                              decimal.mark = ".", 
+                                              trim = TRUE)) +
     labs(
       x = "Year", 
       y = "Percentage", 
@@ -151,11 +158,13 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
       subtitle = "By video features"
     ) + 
     theme_ipsum() +
+    scale_fill_brewer(palette = "Dark2") +
     theme(
       plot.title = element_text(hjust = 0, size = 13)
     )
 ```
 
+Plot 2:
 ```{r wrangling_function}
 # create compare function for different categories
 create_compare <- function(varname, full_data) {
@@ -246,17 +255,30 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) +
 
 ### Discussion
 
-First, we look at audience preference of various features in ads. From 2000 to 
-2020, the ads that contain dangerous elements are getting more likes than ads that
-do not contain dangerous elements. There is no obvious trend that the audience
-strongly prefer a specific feature other than `danger` over the years.In certain 
-years, audience feel strongly about ads that contain specific features.
-In 2010, ads that contain `animals` element are liked more than 3 times compared 
-to ads that do not contain animals. Same observation is shown for ads containing
-`patriotic` element in 2010. However, from 2017 to 2020, ads that
-contain `patriotic` content become less liked. Ads that use sexuality are far more
-liked in 2004 but are less liked in 2015. In 2002, the ads that have no humorous 
-element are liked almost 3 times as ads that have humorous element. 
+In the stacked area chart, the percentage or proportion of each video feature is 
+calculated by first counting the total number of TRUE-valued Boolean variable in 
+each year ("funny", "patriotic", etc.), and then generate a dataframe with all 21 
+years together. Thus, we should focus on the width of each color bands, instead 
+of trying to interpret the lines. Here, we can see that over the years, `funny` 
+and `show_product_quickly` take up the highest proportion among the seven video 
+features. However, both of them are showing a decreasing trend when it's around
+2020. In fact, other features, such as `patriotic` and `use_sex`, experiences 
+decreases recently. And `celebrity` is, nevertheless, having an increasing 
+relative proportion. Feature `patriotic` takes up the least proportion overall,
+but it reaches its peak proportion around 2017. 
+
+For line plots, we first look at audience preference of various features in ads. 
+From 2000 to 2020, the ads that contain dangerous elements are getting more likes 
+than ads thatdo not contain dangerous elements. There is no obvious trend that 
+the audience strongly prefer a specific feature other than `danger` over the 
+years.In certain years, audience feel strongly about ads that contain specific 
+features. In 2010, ads that contain `animals` element are liked more than 3 
+times compared to ads that do not contain animals. Same observation is shown 
+for ads containing `patriotic` element in 2010. However, from 2017 to 2020, 
+ads that contain `patriotic` content become less liked. Ads that use sexuality 
+are far more liked in 2004 but are less liked in 2015. In 2002, the ads that 
+have no humorous element are liked almost 3 times as ads that have humorous 
+element. 
 
 Then, we look at what kinds of ads elicit the audience to engage by commenting.
 In general, the engagement rate is pretty low. However, in 2004 specifically there 
@@ -272,7 +294,9 @@ Furthermore, the youtube videos have been collected from random Youtube users
 instead of influencers or official commercial accounts. Therefore, the views, likes,
 and engagement also depend on the account itself.
 
-## Question 2 <- Update title to relate to the question you’re answering
+
+
+## Question 2: How do election year ads differ from non-election year ads in terms of content and description?
 
 ### Introduction
 
@@ -318,11 +342,9 @@ election_year <- c(2000, 2004, 2008, 2012, 2016, 2020)
 # Adding an election year variable
 youtube <- youtube %>%
   mutate(election_years = ifelse(year %in% election_year, 1, 0))
-
 test <- youtube %>%
   filter(election_years == 1) %>%
   select(title)
-
 docs <- VCorpus(VectorSource(test))
 docs <- docs %>%
   tm_map(removeNumbers) %>%
@@ -340,13 +362,10 @@ dtm <- TermDocumentMatrix(docs)
 matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing = TRUE)
 election_df <- data.frame(word = names(words), freq = words)
-
-
 election_df <- election_df %>% 
   mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
    # Package to get sentiment scores for each word in the dataset
   mutate(sentiment = get_sentiment(word,"syuzhet"))
-
 ```
 
 ``` {r election-wordcloud-viz}
@@ -374,7 +393,6 @@ election_df %>%
 no_election_title <- youtube %>%
   filter(election_years == 0) %>%
   select(title)
-
 # Data Wrangling steps
 docs <- VCorpus(VectorSource(no_election_title))
 docs <- docs %>%
@@ -384,7 +402,6 @@ docs <- docs %>%
   tm_map(removePunctuation) %>%
   # Removing whitespace
   tm_map(stripWhitespace)
-
 # transforming words to lowercase
 docs <- tm_map(docs, content_transformer(tolower))
 # removing words that contain brand names
@@ -394,20 +411,16 @@ docs <- tm_map(docs, removeWords, c(
   "hyundai", "doritos", "coke", "cocacola",
   "cola", "coca", "the", "kia","toyota"
 ))
-
 # Creating df that can be used by ggwordcloud
 dtm <- TermDocumentMatrix(docs)
 matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing = TRUE)
 non_election_df <- data.frame(word = names(words), freq = words)
-
 # Adding the sentiment score variable 
 non_election_df <- non_election_df %>% 
   mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
   filter(freq >= 2) %>% 
   mutate(sentiment = get_sentiment(word,"syuzhet"))
-
-
 ```
 
 
@@ -444,8 +457,6 @@ election_yr <- youtube %>%
   group_by(name) %>%
   summarise(n = n()) %>%
   mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
-
-
 # Creating the plot
 election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
@@ -466,7 +477,6 @@ election_yr %>%
 
 
 ```{r non-election-col-plot}
-
 # Creating variable with no election, using pivot_longer to get attributes in the
 # same column, and creating a percentage variable
 no_election_yr <- youtube %>%
@@ -476,7 +486,6 @@ no_election_yr <- youtube %>%
   group_by(name) %>%
   summarise(n = n()) %>%
   mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
-
 # No Election year col vizualization
 no_election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
@@ -527,7 +536,8 @@ Our presentation can be found [here](presentation/presentation.html).
 ## Data 
 
 Include a citation for your data here. 
-See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on proper citation for datasets. 
+See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on 
+proper citation for datasets. 
 If you got your data off the web, make sure to note the retrieval date.
 
 ## References
