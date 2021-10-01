@@ -257,9 +257,101 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) +
 
 ---
 
-## How do election year ads differ from non-election year ads in terms of content and description?
+``` {r election-col, echo = FALSE, warning = FALSE}
+# Creating variable with election, using pivot_longer to get attributes in the
+# same column, and creating a percentage variable
+election_year <- c(2000, 2004, 2008, 2012, 2016, 2020)
+# Adding an election year variable
+youtube <- youtube %>%
+  mutate(election_years = ifelse(year %in% election_year, 1, 0))
+election_yr <- youtube %>%
+  pivot_longer(cols = c(use_sex, funny, celebrity, patriotic, danger, animals)) %>%
+  filter(election_years == 1) %>%
+  filter(value == TRUE) %>%
+  group_by(name) %>%
+  summarise(n = n()) %>%
+  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
+```
+
+
+### Content Comparision
 
 .pull-left[
+``` {r election-col-plot, out.width = "130%", fig.width = 15, fig.height = 20, echo = FALSE, warning = FALSE}
+# Creating the plot
+election_yr %>%
+  ggplot(aes(y = name, x = n, fill = name)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = perc, color = name), nudge_x = 2, show.legend = FALSE,
+            size = 8) +
+  labs(
+    x = "Count",
+    y = "Ad Attribute",
+    title = "Count and Proportion of Ad by Attribute",
+    subtitle = "In Election Years"
+  ) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_minimal()+
+  theme(text = element_text(size = 25)) +
+  scale_y_discrete(labels = rev(c("Use Sex",
+                              "Patriotic",
+                              "Funny",
+                              "Danger",
+                              "Celebrity",
+                              "Animals")))
+```
+]
+
+```{r non-election-col, echo = FALSE, warning = FALSE}
+# Creating variable with no election, using pivot_longer to get attributes in the
+# same column, and creating a percentage variable
+no_election_yr <- youtube %>%
+  pivot_longer(cols = c(use_sex, funny, celebrity, patriotic, danger, animals)) %>%
+  filter(election_years == 0) %>%
+  filter(value == TRUE) %>%
+  group_by(name) %>%
+  summarise(n = n()) %>%
+  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
+```
+
+.pull-right[
+```{r non-election-col-plot, out.width = "130%", fig.width = 15, fig.height = 20, echo = FALSE, warning = FALSE}
+# No Election year col vizualization
+no_election_yr %>%
+  ggplot(aes(y = name, x = n, fill = name)) +
+  geom_col(show.legend = FALSE) +
+  geom_text(aes(label = perc, color = name), nudge_x = 4, show.legend = FALSE,
+            size = 8) +
+  labs(
+    x = "Count",
+    y = "Ad Attribute",
+    title = "Count and Proportion of Ad by Attribute",
+    subtitle = "In Non-Election Years"
+  ) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_minimal() +
+  theme(text = element_text(size = 25)) +
+  scale_y_discrete(labels = rev(c("Use Sex",
+                              "Patriotic",
+                              "Funny",
+                              "Danger",
+                              "Celebrity",
+                              "Animals")))
+
+```
+1. Marginal difference in Patriotic 
+2. Change in Use Sex
+
+]
+
+
+
+---
+
+
+.center[
 ``` {r data-prep-election-wordcloud, echo = FALSE, warning = FALSE}
 # # Election years in the dataset
 election_year <- c(2000, 2004, 2008, 2012, 2016, 2020)
@@ -297,7 +389,7 @@ election_df <- election_df %>%
 ```
 
 ``` {r election-wordcloud-viz, warning = FALSE, out.width = "90%", fig.width = 10, fig.height = 11, echo = FALSE}
-election_df %>%
+elec_word_C <-election_df %>%
   ggplot(aes(
     label = word,
     color = sentiment,
@@ -315,15 +407,14 @@ election_df %>%
       Yellower for negative sentiment"
   )
 ```
-]
-.pull-right[
-```{r non-election-wordcloud-data-prep, echo = FALSE, warning = FALSE, eval = FALSE}
+
+```{r non-election-wordcloud-data-prep, echo = FALSE, warning = FALSE}
 # Isolating the title variable
 no_election_title <- youtube %>%
   filter(election_years == 0) %>%
   select(title)
 
-Data Wrangling steps
+#Data Wrangling steps
 docs <- VCorpus(VectorSource(no_election_title))
 docs <- docs %>%
   # Removing numbers
@@ -357,8 +448,8 @@ non_election_df <- non_election_df %>%
 ```
 
 
-``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 10, fig.height = 11, echo = FALSE, warning = FALSE, eval = FALSE}
-non_election_df %>%
+``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 10, fig.height = 8, echo = FALSE, warning = FALSE, cache = TRUE}
+no_elec_wordC <- non_election_df %>%
   ggplot(aes(
     label = word,
     color = sentiment,
@@ -370,78 +461,14 @@ non_election_df %>%
   theme_minimal() +
   scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")+
   labs(
-    title = "Non-election Year Ad Title Word Cloud",
-    subtitle = "Colored by Sentiment
-      Bluer for postive sentiments
-      Yellower for negative sentiment")
+    title = "Non-election Year Ad Title Word Cloud")
+
+library(patchwork)
+elec_word_C / no_elec_wordC
+
 ```
 ]
 
----
-
-### Based on the two word clouds above...
-
-``` {r election-col, echo = FALSE, warning = FALSE}
-# Creating variable with election, using pivot_longer to get attributes in the
-# same column, and creating a percentage variable
-election_yr <- youtube %>%
-  pivot_longer(cols = c(use_sex, funny, celebrity, patriotic, danger, animals)) %>%
-  filter(election_years == 1) %>%
-  filter(value == TRUE) %>%
-  group_by(name) %>%
-  summarise(n = n()) %>%
-  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
-```
-
-.pull-left[
-``` {r election-col-plot, out.width = "90%", fig.width = 11, fig.height = 11, echo = FALSE, warning = FALSE}
-# Creating the plot
-election_yr %>%
-  ggplot(aes(y = name, x = n, fill = name)) +
-  geom_col(show.legend = FALSE) +
-  geom_text(aes(label = perc, color = name), nudge_x = 2, show.legend = FALSE) +
-  labs(
-    x = "Count",
-    y = "Ad Attribute",
-    title = "Count and Proportion of Ad by Attribute",
-    subtitle = "In Election Years"
-  ) +
-  scale_fill_brewer(palette = "Dark2") +
-  scale_color_brewer(palette = "Dark2") +
-  theme_minimal()
-```
-]
-
-```{r non-election-col, echo = FALSE, warning = FALSE}
-# Creating variable with no election, using pivot_longer to get attributes in the
-# same column, and creating a percentage variable
-no_election_yr <- youtube %>%
-  pivot_longer(cols = c(use_sex, funny, celebrity, patriotic, danger, animals)) %>%
-  filter(election_years == 0) %>%
-  filter(value == TRUE) %>%
-  group_by(name) %>%
-  summarise(n = n()) %>%
-  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
-```
-
-.pull-right[
-```{r non-election-col-plot, out.width = "90%", fig.width = 11, fig.height = 11, echo = FALSE, warning = FALSE}
-# No Election year col vizualization
-no_election_yr %>%
-  ggplot(aes(y = name, x = n, fill = name)) +
-  geom_col(show.legend = FALSE) +
-  geom_text(aes(label = perc, color = name), nudge_x = 4, show.legend = FALSE) +
-  labs(
-    x = "Count",
-    y = "Ad Attribute",
-    title = "Count and Proportion of Ad by Attribute",
-    subtitle = "In Non-Election Years"
-  ) +
-  scale_fill_brewer(palette = "Dark2") +
-  scale_color_brewer(palette = "Dark2") +
-  theme_minimal()
-```
-]
 ---
 
 ## Plot and text
