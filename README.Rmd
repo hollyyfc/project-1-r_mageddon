@@ -83,24 +83,25 @@ differ if an ad contains a attribute or not.
 Plot 1: 
 ```{r counter}
 # First, create a function that returns total count of a specific attribute in one year.
-count_attribute_number <- function(data, attribute_name, desired_year){
-  count1 = 0
-  for (i in seq(1, nrow(data))){
-    if (data$year[i] == desired_year){
-      if (data[i, attribute_name] == TRUE){
-        count1 = count1 + 1
+count_attribute_number <-
+  function(data, attribute_name, desired_year) {
+    count1 = 0
+    for (i in seq(1, nrow(data))) {
+      if (data$year[i] == desired_year) {
+        if (data[i, attribute_name] == TRUE) {
+          count1 = count1 + 1
+        }
       }
     }
+    return(count1)
   }
-  return(count1)
-}
 ```
 
 ```{r generator}
 # With help from the counter above, we define a new function that creates a 
 ## generalized attribute counting dataframe for a single year.
-generator <- function(data, year){
-  funny_count = count_attribute_number(data, "funny", year) 
+generator <- function(data, year) {
+  funny_count = count_attribute_number(data, "funny", year)
   show_quickly_count = count_attribute_number(data, "show_product_quickly", year)
   patriotic_count = count_attribute_number(data, "patriotic", year)
   celebrity_count = count_attribute_number(data, "celebrity", year)
@@ -109,11 +110,25 @@ generator <- function(data, year){
   use_sex_count = count_attribute_number(data, "use_sex", year)
   
   year_value <- rep(year, 7)
-  count_of_attribute <- c(funny_count, show_quickly_count, patriotic_count, 
-                        celebrity_count, danger_count, animals_count, 
-                        use_sex_count)
-  attributes <- c("Funny", "Show product quickly", "Patriotic", 
-                "Celebrity", "Danger", "Animals", "Use sex")
+  count_of_attribute <-
+    c(
+      funny_count,
+      show_quickly_count,
+      patriotic_count,
+      celebrity_count,
+      danger_count,
+      animals_count,
+      use_sex_count
+    )
+  attributes <- c(
+    "Funny",
+    "Show product quickly",
+    "Patriotic",
+    "Celebrity",
+    "Danger",
+    "Animals",
+    "Use sex"
+  )
   year_table <- cbind(year_value, count_of_attribute, attributes)
   year_df <- as.data.frame(year_table)
   return(year_df)
@@ -122,11 +137,11 @@ generator <- function(data, year){
 
 ```{r appender}
 # Then, using the "appender" function below to get the final dataframe for 
-## all years from 2000 to 2020. 
-appender <- function(data){
+## all years from 2000 to 2020.
+appender <- function(data) {
   year_general_df <- generator(data, 2000)
-  for (j in seq(2001, 2020)){
-    year_general_df <- rbind(year_general_df, 
+  for (j in seq(2001, 2020)) {
+    year_general_df <- rbind(year_general_df,
                              generator(data, j))
   }
   return(year_general_df)
@@ -147,41 +162,58 @@ year_attribute <- year_attribute_df %>%
   mutate(percentage = n / sum(n))
 
 # Plot stacked area chart
-ggplot(year_attribute, aes(x = year_value, y = percentage, fill = attributes)) + 
-    geom_area(alpha=0.6 , size=.5, colour="white") +
-    scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, 
-                                              prefix = "", suffix = "%", 
-                                              big.mark = " ", 
-                                              decimal.mark = ".", 
-                                              trim = TRUE)) +
-    labs(
-      x = "Year", 
-      y = "Percentage", 
-      fill = "Attributes",
-      title = "Percentage comparison among video attributes in\nSuperbowl commercials over years (2000~2020)",
-      subtitle = "By video attributes"
-    ) + 
-    theme_ipsum() +
-    scale_fill_brewer(palette = "Dark2") +
-    theme(
-      plot.title = element_text(hjust = 0, size = 13, face = "plain")
+ggplot(year_attribute,
+       aes(x = year_value, y = percentage, fill = attributes)) +
+  geom_area(alpha = 0.6 ,
+            size = .5,
+            colour = "white") +
+  scale_y_continuous(
+    labels = label_percent(
+      accuracy = NULL,
+      scale = 100,
+      prefix = "",
+      suffix = "%",
+      big.mark = " ",
+      decimal.mark = ".",
+      trim = TRUE
     )
+  ) +
+  labs(
+    x = "Year",
+    y = "Percentage",
+    fill = "Attributes",
+    title = "Percentage comparison among video attributes in\nSuperbowl commercials over years (2000~2020)",
+    subtitle = "By video attributes"
+  ) +
+  theme_ipsum() +
+  scale_fill_brewer(palette = "Dark2") +
+  theme(plot.title = element_text(hjust = 0, size = 13, face = "plain"))
 ```
 
 Plot 2:
 ```{r wrangling_function}
-# create compare function for different 
+# create compare function for different
 # Function was written with the help of TA
 create_compare <- function(varname, full_data) {
-  full_data <- full_data %>% 
-    # drop N/A value for key variables 
-    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
+  full_data <- full_data %>%
+    # drop N/A value for key variables
+    drop_na({
+      {
+        varname
+      }
+    }, like_count, view_count, dislike_count, comment_count) %>%
     # create new variables for preference, dislike, engagement, and attributes
-    mutate(like = like_count / view_count,
-           dislike = dislike_count / view_count,
-           engage = comment_count / view_count,
-           attribute = as_label(enquo(varname))) %>% 
-    select({{varname}}, like, dislike, engage, attribute, year) %>%
+    mutate(
+      like = like_count / view_count,
+      dislike = dislike_count / view_count,
+      engage = comment_count / view_count,
+      attribute = as_label(enquo(varname))
+    ) %>%
+    select({
+      {
+        varname
+      }
+    }, like, dislike, engage, attribute, year) %>%
     rename(val = as_label(enquo(varname)))
   return(full_data)
 }
@@ -190,52 +222,71 @@ create_compare <- function(varname, full_data) {
 
 ```{r create new table}
 # create a new data frame that contains key variables
-all_compare <- rbind(create_compare(funny, youtube),
-                     create_compare(danger, youtube),
-                     create_compare(show_product_quickly, youtube),
-                     create_compare(patriotic, youtube),
-                     create_compare(celebrity, youtube),
-                     create_compare(animals, youtube),
-                     create_compare(use_sex, youtube)) %>% 
+all_compare <- rbind(
+  create_compare(funny, youtube),
+  create_compare(danger, youtube),
+  create_compare(show_product_quickly, youtube),
+  create_compare(patriotic, youtube),
+  create_compare(celebrity, youtube),
+  create_compare(animals, youtube),
+  create_compare(use_sex, youtube)
+) %>%
   # change variable names to be more readable
-  mutate(attribute = recode(attribute, 'animals' = 'Animals', 
-                          'celebrity' = 'Celebrity', 
-                          'danger' = 'Danger',
-                          'funny' = 'Funny',
-                          'patriotic' = 'Patriotic',
-                          'show_product_quickly' = 'Show product quickly',
-                          'use_sex' = 'Use sexuality')) %>% 
-  group_by(year, attribute, val) %>% 
-  summarise(mean_like = mean(like),
-            mean_engage = mean(engage),
-            .groups = "drop")
+  mutate(
+    attribute = recode(
+      attribute,
+      'animals' = 'Animals',
+      'celebrity' = 'Celebrity',
+      'danger' = 'Danger',
+      'funny' = 'Funny',
+      'patriotic' = 'Patriotic',
+      'show_product_quickly' = 'Show product quickly',
+      'use_sex' = 'Use sexuality'
+    )
+  ) %>%
+  group_by(year, attribute, val) %>%
+  summarise(
+    mean_like = mean(like),
+    mean_engage = mean(engage),
+    .groups = "drop"
+  )
 ```
 
 
 ```{r like plot}
 # plotting like vs. year
-ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
-  geom_line(aes(color = val)) + 
-  labs(title = "Audience preferences for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video attributes and year",
-       x = "Year of Superbowl",
-       y = "Average ratio of likes over views") +
-  facet_wrap(~attribute) +
+ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
+  geom_line(aes(color = val)) +
+  labs(
+    title = "Audience preferences for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+    subtitle = "By video attributes and year",
+    x = "Year of Superbowl",
+    y = "Average ratio of likes over views"
+  ) +
+  facet_wrap(~ attribute) +
   scale_color_manual("attribute", values = c("#808080", "#FF0000")) +
-  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100,
-                                            prefix = "",
-                                            suffix = "%", big.mark = " ",
-                                            decimal.mark = ".",
-                                            trim = TRUE)) +
-  scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020)) + 
+  scale_y_continuous(
+    labels = label_percent(
+      accuracy = NULL,
+      scale = 100,
+      prefix = "",
+      suffix = "%",
+      big.mark = " ",
+      decimal.mark = ".",
+      trim = TRUE
+    )
+  ) +
+  scale_x_continuous(breaks = c(2000, 2004, 2008, 2012, 2016, 2020)) +
   theme_minimal() +
-  theme(axis.title.x = element_text(hjust = 0.5),
-        axis.title.y = element_text(margin = margin(r = 20),
-                                    hjust = 0.5),
-        panel.spacing = unit(1.5, "lines"),
-        legend.position = c(0.95, 0.1),
-        legend.title = element_blank(),
-        plot.title = element_text(size = 12))
+  theme(
+    axis.title.x = element_text(hjust = 0.5),
+    axis.title.y = element_text(margin = margin(r = 20),
+                                hjust = 0.5),
+    panel.spacing = unit(1.5, "lines"),
+    legend.position = c(0.95, 0.1),
+    legend.title = element_blank(),
+    plot.title = element_text(size = 12)
+  )
 ```
 
 
@@ -326,30 +377,51 @@ election_year <- c(2000, 2004, 2008, 2012, 2016, 2020)
 # Adding an election year variable
 youtube <- youtube %>%
   mutate(election_years = ifelse(year %in% election_year, 1, 0))
+# Data Wrangling steps
 test <- youtube %>%
   filter(election_years == 1) %>%
   select(title)
 docs <- VCorpus(VectorSource(test))
 docs <- docs %>%
+  # Removing numbers
   tm_map(removeNumbers) %>%
+  # Removing punctuation
   tm_map(removePunctuation) %>%
+  # Removing whitespace
   tm_map(stripWhitespace)
 docs <- tm_map(docs, content_transformer(tolower))
 docs <- tm_map(docs, removeWords, stopwords("english"))
-docs <- tm_map(docs, removeWords, c(
-  "super", "bowl", "commercial", "superbowl",
-  "bud", "light", "budweiser", "pepsi",
-  "hyundai", "doritos", "coke", "cocacola",
-  "cola", "coca", "kia", "toyota"
-))
+# Removing words that contain brand names
+docs <- tm_map(
+  docs,
+  removeWords,
+  c(
+    "super",
+    "bowl",
+    "commercial",
+    "superbowl",
+    "bud",
+    "light",
+    "budweiser",
+    "pepsi",
+    "hyundai",
+    "doritos",
+    "coke",
+    "cocacola",
+    "cola",
+    "coca",
+    "kia",
+    "toyota"
+  )
+)
 dtm <- TermDocumentMatrix(docs)
 matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing = TRUE)
 election_df <- data.frame(word = names(words), freq = words)
-election_df <- election_df %>% 
+election_df <- election_df %>%
   mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
-   # Package to get sentiment scores for each word in the dataset
-  mutate(sentiment = get_sentiment(word,"syuzhet"))
+  # Package to get sentiment scores for each word in the dataset
+  mutate(sentiment = get_sentiment(word, "syuzhet"))
 ```
 
 ``` {r election-wordcloud-viz}
@@ -362,8 +434,8 @@ election_df %>%
   )) +
   geom_text_wordcloud() +
   scale_radius(range = c(2, 15)) +
-  theme_minimal() + 
-  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF") + 
+  theme_minimal() +
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF") +
   labs(
     title = "Election Year Ad Title Word Cloud",
     subtitle = "Colored by Sentiment
@@ -389,27 +461,44 @@ docs <- docs %>%
 # transforming words to lowercase
 docs <- tm_map(docs, content_transformer(tolower))
 # removing words that contain brand names
-docs <- tm_map(docs, removeWords, c(
-  "super", "bowl", "commercial", "superbowl",
-  "bud", "light", "budweiser", "pepsi",
-  "hyundai", "doritos", "coke", "cocacola",
-  "cola", "coca", "the", "kia","toyota"
-))
+docs <- tm_map(
+  docs,
+  removeWords,
+  c(
+    "super",
+    "bowl",
+    "commercial",
+    "superbowl",
+    "bud",
+    "light",
+    "budweiser",
+    "pepsi",
+    "hyundai",
+    "doritos",
+    "coke",
+    "cocacola",
+    "cola",
+    "coca",
+    "the",
+    "kia",
+    "toyota"
+  )
+)
 # Creating df that can be used by ggwordcloud
 dtm <- TermDocumentMatrix(docs)
 matrix <- as.matrix(dtm)
 words <- sort(rowSums(matrix), decreasing = TRUE)
 non_election_df <- data.frame(word = names(words), freq = words)
-# Adding the sentiment score variable 
-non_election_df <- non_election_df %>% 
+# Adding the sentiment score variable
+non_election_df <- non_election_df %>%
   mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
-  filter(freq >= 2) %>% 
-  mutate(sentiment = get_sentiment(word,"syuzhet"))
+  filter(freq >= 2) %>%
+  mutate(sentiment = get_sentiment(word, "syuzhet"))
 ```
 
 
 ``` {r non-election-wordcloud-viz}
-non_election_df %>% 
+non_election_df %>%
   ggplot(aes(
     label = word,
     color = sentiment,
@@ -418,13 +507,14 @@ non_election_df %>%
   )) +
   geom_text_wordcloud() +
   scale_radius(range = c(3.5, 15)) +
-  theme_minimal() + 
-  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")+
+  theme_minimal() +
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF") +
   labs(
     title = "Non-election Year Ad Title Word Cloud",
     subtitle = "Colored by Sentiment
       Bluer for postive sentiments
-      Yellower for negative sentiment") 
+      Yellower for negative sentiment"
+  ) 
 ```
 
 
@@ -439,12 +529,16 @@ election_yr <- youtube %>%
   filter(value == TRUE) %>%
   group_by(name) %>%
   summarise(n = n()) %>%
-  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
+  mutate(perc = paste(round((n / sum(
+    n
+  )) * 100), "%", sep = ""))
 # Creating the plot
 election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
-  geom_text(aes(label = perc, color = name), nudge_x = 2, show.legend = FALSE) +
+  geom_text(aes(label = perc, color = name),
+            nudge_x = 2,
+            show.legend = FALSE) +
   labs(
     x = "Count",
     y = "Ad Attribute",
@@ -468,12 +562,16 @@ no_election_yr <- youtube %>%
   filter(value == TRUE) %>%
   group_by(name) %>%
   summarise(n = n()) %>%
-  mutate(perc = paste(round((n / sum(n)) * 100), "%", sep = ""))
+  mutate(perc = paste(round((n / sum(
+    n
+  )) * 100), "%", sep = ""))
 # No Election year col vizualization
 no_election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
-  geom_text(aes(label = perc, color = name), nudge_x = 4, show.legend = FALSE) +
+  geom_text(aes(label = perc, color = name),
+            nudge_x = 4,
+            show.legend = FALSE) +
   labs(
     x = "Count",
     y = "Ad Attribute",
@@ -518,11 +616,12 @@ Our presentation can be found [here](presentation/presentation.html).
 
 ## Data 
 
-Include a citation for your data here. 
-See http://libraryguides.vu.edu.au/c.php?g=386501&p=4347840 for guidance on 
-proper citation for datasets. 
-If you got your data off the web, make sure to note the retrieval date.
+Mock, T 2021, *Superbowl commercials*, electronic dataset, 
+tidytuesday, viewed 20 September 2021,
+<https://github.com/rfordatascience/tidytuesday/blob/master/data/2021/2021-03-02/readme.md>.
 
 ## References
 
+https://www.r-graph-gallery.com/136-stacked-area-chart
+https://cran.r-project.org/web/packages/syuzhet/vignettes/syuzhet-vignette.html
 https://cran.r-project.org/web/packages/ggwordcloud/vignettes/ggwordcloud.html

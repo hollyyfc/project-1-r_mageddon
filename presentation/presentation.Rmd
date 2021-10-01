@@ -34,6 +34,7 @@ library(stringr)
 library(textdata)
 library(hrbrthemes)
 library(scales)
+library(patchwork)
 ```
 
 ```{r setup, include = FALSE}
@@ -136,6 +137,10 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
 
 ---
 
+## Q1: What is the trend of the ads' content and audience preferences over the years?
+
+---
+
 ## Any trends in how the ads change over the years in terms of content?
 
 ```{r STACKED-BAR-CHART, echo = FALSE, warning = FALSE, message=FALSE}
@@ -226,6 +231,8 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
 ```
 
 ---
+
+## Q2: How do election year ads differ from non-election year ads in terms of content and titles?
 
 
 .center[
@@ -340,7 +347,6 @@ no_elec_wordC <- non_election_df %>%
   labs(
     title = "Non-election Year Ad Title Word Cloud")
 
-library(patchwork)
 elec_word_C / no_elec_wordC
 
 ```
@@ -436,5 +442,10 @@ no_election_yr %>%
 2. Change in Use Sex
 ]
 
+---
+
+# Q&A
+
+---
 
 

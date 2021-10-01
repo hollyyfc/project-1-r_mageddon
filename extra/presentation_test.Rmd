@@ -152,8 +152,7 @@ no_election_yr %>%
 
 
 ---
-
-
+### Title Comparision
 .center[
 ``` {r data-prep-election-wordcloud, echo = FALSE, warning = FALSE}
 # # Election years in the dataset
@@ -191,7 +190,7 @@ election_df <- election_df %>%
   mutate(sentiment = get_sentiment(word,"syuzhet"))
 ```
 
-``` {r election-wordcloud-viz, warning = FALSE, out.width = "90%", fig.width = 10, fig.height = 11, echo = FALSE}
+``` {r election-wordcloud-viz, warning = FALSE, out.width = "90%", fig.width = 10, fig.height = 9, echo = FALSE}
 elec_word_C <-election_df %>%
   ggplot(aes(
     label = word,
