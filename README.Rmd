@@ -1,6 +1,6 @@
 ---
-title: Investigating content and audience reactions to youtube Super Bowl commercials
-author: by R-Mageddon
+title: "Investigating content and audience reactions to youtube Super Bowl commercials"
+author: "by R-Mageddon"
 output: github_document
 ---
 
@@ -60,7 +60,6 @@ used to calculate ratio of like/engagement over total views.
 
 ### Approach
 
-
 For the first plot, we used a stacked area chart to see how the attribute makeup
 of ads has changed over time. This is achieved by first counting the total number 
 of `TRUE`-valued Boolean variable in each year and then determining of the total `TRUE`
@@ -75,7 +74,7 @@ that is created using all logical variables in the data set. The faceted line
 graph is suitable for time-dependent changes by each categorical variable. 
 Because the logical variables are either true or false, 2 different lines in 
 each sub-plot clearly show how the trends (audience preference in this case) 
-differ if an ad contains a attribute or not.
+differ if an ad contains an attribute or not.
 
 
 
