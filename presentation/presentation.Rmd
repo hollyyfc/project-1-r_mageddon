@@ -62,11 +62,12 @@ style_xaringan(
 
 ## Introduction
 
-- Many things have changed in the first 20 years of the 21st century, such as 
-life science breakthroughs, political conflicts, feminist movements, etc.
+- The Super Bowl has top television ratings in the US, which made its commercials the most expensive among other TV programs and widely watched by audience.
 
-- Could the characteristics of Super Bowl commercials give us some insights about
-such changes?
+- Many things have changed in the first 20 years of the 21st century, such as life science breakthroughs, political conflicts, feminist movements, etc.
+
+
+- Could the characteristics of Super Bowl commercials give us insights about such changes?
 
 ---
 
@@ -144,71 +145,84 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
 ## Any trends in how the ads change over the years in terms of content?
 
 ```{r STACKED-BAR-CHART, echo = FALSE, warning = FALSE, message=FALSE}
-
-# First, create a function that returns total count of a specific feature in one year.
-count_feature_number <- function(data, feature_name, desired_year){
-  count1 = 0
-  for (i in seq(1, nrow(data))){
-    if (data$year[i] == desired_year){
-      if (data[i, feature_name] == TRUE){
-        count1 = count1 + 1
+# First, create a function that returns total count of a specific attribute in one year.
+count_attribute_number <-
+  function(data, attribute_name, desired_year) {
+    count1 = 0
+    for (i in seq(1, nrow(data))) {
+      if (data$year[i] == desired_year) {
+        if (data[i, attribute_name] == TRUE) {
+          count1 = count1 + 1
+        }
       }
     }
+    return(count1)
   }
-  return(count1)
-}
-
 
 # With help from the counter above, we define a new function that creates a 
-## generalized feature counting dataframe for a single year.
-generator <- function(data, year){
-  funny_count = count_feature_number(data, "funny", year) 
-  show_quickly_count = count_feature_number(data, "show_product_quickly", year)
-  patriotic_count = count_feature_number(data, "patriotic", year)
-  celebrity_count = count_feature_number(data, "celebrity", year)
-  danger_count = count_feature_number(data, "danger", year)
-  animals_count = count_feature_number(data, "animals", year)
-  use_sex_count = count_feature_number(data, "use_sex", year)
+## generalized attribute counting dataframe for a single year.
+generator <- function(data, year) {
+  funny_count = count_attribute_number(data, "funny", year)
+  show_quickly_count = count_attribute_number(data, "show_product_quickly", year)
+  patriotic_count = count_attribute_number(data, "patriotic", year)
+  celebrity_count = count_attribute_number(data, "celebrity", year)
+  danger_count = count_attribute_number(data, "danger", year)
+  animals_count = count_attribute_number(data, "animals", year)
+  use_sex_count = count_attribute_number(data, "use_sex", year)
   
   year_value <- rep(year, 7)
-  count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
-                        celebrity_count, danger_count, animals_count, use_sex_count)
-  features <- c("Funny", "Show product quickly", "Patriotic", 
-                "Celebrity", "Danger", "Animals", "Use sex")
-  year_table <- cbind(year_value, count_of_feature, features)
+  count_of_attribute <-
+    c(
+      funny_count,
+      show_quickly_count,
+      patriotic_count,
+      celebrity_count,
+      danger_count,
+      animals_count,
+      use_sex_count
+    )
+  attributes <- c(
+    "Funny",
+    "Show product quickly",
+    "Patriotic",
+    "Celebrity",
+    "Danger",
+    "Animals",
+    "Use sex"
+  )
+  year_table <- cbind(year_value, count_of_attribute, attributes)
   year_df <- as.data.frame(year_table)
   return(year_df)
 }
-
-
 # Then, using the "appender" function below to get the final dataframe for 
-## all years from 2000 to 2020. 
-appender <- function(data){
+## all years from 2000 to 2020.
+appender <- function(data) {
   year_general_df <- generator(data, 2000)
-  for (j in seq(2001, 2020)){
-    year_general_df <- rbind(year_general_df, 
+  for (j in seq(2001, 2020)) {
+    year_general_df <- rbind(year_general_df,
                              generator(data, j))
   }
   return(year_general_df)
 }
-
-
-# Use the function and get our desired plot
-year_feature_df <- appender(youtube)
-
-year_feature <- year_feature_df %>%
-  mutate(
-    year_value = as.numeric(as.character(year_value)),
-    count_of_feature = as.numeric(as.character(count_of_feature))
-  ) %>%
-  group_by(year_value, features) %>%
-  summarise(n = sum(count_of_feature)) %>%
-  mutate(percentage = n / sum(n))
 ```
 
 
 ```{r plotting stacked area chart, warning = FALSE, out.width = "60%", fig.height = 5, fig.width = 7, echo = FALSE}
-ggplot(year_attribute, aes(x = year_value, y = percentage, fill = attributes)) +
+# Use the function and get our desired plot
+youtube1 <- youtube
+year_attribute_df <- appender(youtube1)
+year_attribute <- year_attribute_df %>%
+  mutate(
+    year_value = as.numeric(as.character(year_value)),
+    count_of_attribute = as.numeric(as.character(count_of_attribute))
+  ) %>%
+  group_by(year_value, attributes) %>%
+  summarise(n = sum(count_of_attribute), .groups = "drop_last") %>%
+  mutate(percentage = n / sum(n))
+
+# Plot stacked area chart
+ggplot(year_attribute,
+       aes(x = year_value, y = percentage, fill = attributes)) +
   geom_area(alpha = 0.6 ,
             size = .5,
             colour = "white") +
@@ -239,6 +253,8 @@ ggplot(year_attribute, aes(x = year_value, y = percentage, fill = attributes)) +
 
 ## Q2: How do election year ads differ from non-election year ads in terms of content and titles?
 
+---
+### Title Comparision
 
 .center[
 ``` {r data-prep-election-wordcloud, echo = FALSE, warning = FALSE}
@@ -445,6 +461,19 @@ no_election_yr %>%
 ```
 1. Marginal difference in Patriotic 
 2. Change in Use Sex
+]
+
+---
+
+## Findings 
+
+.left[
+
+1. There are matches and unmatches between ads attribute proportions and audience preferences.
+
+2. Marginal difference in content and titles in election and non election years
+
+3. Follow up questions: more specific content variables to analyze in more depth.
 ]
 
 ---

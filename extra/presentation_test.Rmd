@@ -80,7 +80,7 @@ election_yr <- youtube %>%
 ### Content Comparision
 
 .pull-left[
-``` {r election-col-plot, out.width = "130%", fig.width = 15, fig.height = 20, echo = FALSE, warning = FALSE}
+``` {r election-col-plot, out.width = "130%", fig.width = 15, fig.height = 20, echo = FALSE, warning = FALSE, cache = TRUE}
 # Creating the plot
 election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
@@ -119,7 +119,7 @@ no_election_yr <- youtube %>%
 ```
 
 .pull-right[
-```{r non-election-col-plot, out.width = "130%", fig.width = 15, fig.height = 20, echo = FALSE, warning = FALSE}
+```{r non-election-col-plot, out.width = "130%", fig.width = 15, fig.height = 20, echo = FALSE, warning = FALSE, cache = TRUE}
 # No Election year col vizualization
 no_election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
@@ -272,3 +272,14 @@ elec_word_C / no_elec_wordC
 ]
 
 ---
+
+## Findings 
+
+.left[
+
+1. There are matches and unmatches between ads attribute proportions and audience preferences.
+
+2. Marginal difference in content and titles in election and non election years
+
+3. Follow up questions: more specific content variables to analyze in more depth.
+]
