@@ -3,88 +3,28 @@ commercials
 ================
 by R-Mageddon
 
-    ## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──
-
-    ## ✓ ggplot2 3.3.5     ✓ purrr   0.3.4
-    ## ✓ tibble  3.1.4     ✓ dplyr   1.0.7
-    ## ✓ tidyr   1.1.4     ✓ stringr 1.4.0
-    ## ✓ readr   2.0.2     ✓ forcats 0.5.1
-
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
-
-    ## 
-    ## Attaching package: 'lubridate'
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     date, intersect, setdiff, union
-
-    ## Loading required package: viridisLite
-
-    ## NOTE: Either Arial Narrow or Roboto Condensed fonts are required to use these themes.
-
-    ##       Please use hrbrthemes::import_roboto_condensed() to install Roboto Condensed and
-
-    ##       if Arial Narrow is not on your system, please see https://bit.ly/arialnarrow
-
-    ## 
-    ## Attaching package: 'scales'
-
-    ## The following object is masked from 'package:viridis':
-    ## 
-    ##     viridis_pal
-
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     discard
-
-    ## The following object is masked from 'package:readr':
-    ## 
-    ##     col_factor
-
-    ## Loading required package: NLP
-
-    ## 
-    ## Attaching package: 'NLP'
-
-    ## The following object is masked from 'package:ggplot2':
-    ## 
-    ##     annotate
-
-    ## 
-    ## Attaching package: 'syuzhet'
-
-    ## The following object is masked from 'package:scales':
-    ## 
-    ##     rescale
-
-    ## Warning: One or more parsing issues, see `problems()` for details
-
 ## Introduction
 
-<<<<<<< HEAD
 Our `youtube` dataset contains a list of ads from the 10 brands that had
-=======
-The `youtube` dataset contains a list of ads from the 10 brands that had
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 the most advertisements in Super Bowls from 2000 to 2020, according to
 data from superbowl-ads.com, with matching videos found on YouTube. It
 was then analyzed by FiveThirtyEight staffers to come up with seven
 defining characteristics of a Super Bowl ad: `funny`, `danger`,
-<<<<<<< HEAD
 `use_sex`, `show_product_quickly`, `celebrity`, `patriotic`, `animals`,
 which are represented as boolean variables. Furthermore, we are also
 given the `view_count`, `like_count`, `dislike_count`, `favorite_count`,
 `comment_count`, `description`, and `title` for each ad.
-=======
-`use_sex`, `show_product_quickly`, `celebrity`, `patriotic`, `animals`.
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 
 ## Question 1：What’s the trend in the ads’ content, audience preferences, and engagement over the years?
 
 ### Introduction
+
+Many things have changed in the first 20 years of the 21st century.
+There are life science breakthroughs, political conflicts, feminist
+movements, etc. Therefore, we want to see if people’s reaction to Super
+Bowl commercials reflect the changes in their lifestyles and thoughts
+over the years. The changes in the ads themselves may also tell how
+companies are reacting to audience preferences.
 
 We want to explore the trends in how the ads change over the years in
 terms of content, audience preferences, and engagement. To analyze the
@@ -94,84 +34,70 @@ change in content we use the logical variables
 engagement,`like_count`, `comment_count`, and `view_count` are used to
 calculate ratio of like/engagement over total views.
 
-Many things have changed in the first 20 years of the 21st century.
-There are life science breakthroughs, political conflicts, feminist
-movements, etc. Therefore, we want to see if people’s reaction to Super
-Bowl commercials reflect the changes in their lifestyles and thoughts
-over the years. The changes in the ads themselves may also tell how
-companies are reacting to audience preferences.
-
 ### Approach
 
-First, we used a stacked area chart to see how the proportion of each
-video feature changes over years. Here, a stacked area chart is used
-because with continuous lines connecting and separating the elements in
-same group, it is visually compatible when we plan to have year (a time
-variable) as our x axis. More specifically, over the years on the x
-axis, we can compare the relative percentage change of each feature on
-the y axis with areas divided by lines while also linking them together.
+For the first plot, we used a stacked area chart to see how the
+attribute makeup of ads has changed over time. This is achieved by first
+counting the total number of `TRUE`-valued Boolean variable in each year
+and then determining of the total `TRUE` values how many come from each
+attribute. These are then grouped by year and plotted as a stacked area
+chart. We preferred this visualization over the stacked bar chart with
+years on the y-axis since the stacked area chart makes it easier to
+identify the change, if any, in the trend of content proportions over
+the years.
 
-For the second plot, we used a line graphs faceted by `feature`, a
+For the second plot, we used a line graphs faceted by `attribute`, a
 variable that is created using all logical variables in the data set.
 The faceted line graph is suitable for time-dependent changes by each
 categorical variable. Because the logical variables are either true or
 false, 2 different lines in each sub-plot clearly show how the trends
-(audience preference in this case) differ if an ad contains a feature or
-not.
+(audience preference in this case) differ if an ad contains a attribute
+or not.
 
 ### Analysis
 
-<<<<<<< HEAD
-=======
 Plot 1:
 
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 ``` r
-# First, create a function that returns total count of a specific feature in one year.
-count_feature_number <- function(data, feature_name, desired_year){
+# First, create a function that returns total count of a specific attribute in one year.
+count_attribute_number <- function(data, attribute_name, desired_year){
   count1 = 0
   for (i in seq(1, nrow(data))){
     if (data$year[i] == desired_year){
-      if (data[i, feature_name] == TRUE){
+      if (data[i, attribute_name] == TRUE){
         count1 = count1 + 1
       }
     }
   }
   return(count1)
 }
-<<<<<<< HEAD
-=======
 ```
 
 ``` r
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 # With help from the counter above, we define a new function that creates a 
-## generalized feature counting dataframe for a single year.
+## generalized attribute counting dataframe for a single year.
 generator <- function(data, year){
-  funny_count = count_feature_number(data, "funny", year) 
-  show_quickly_count = count_feature_number(data, "show_product_quickly", year)
-  patriotic_count = count_feature_number(data, "patriotic", year)
-  celebrity_count = count_feature_number(data, "celebrity", year)
-  danger_count = count_feature_number(data, "danger", year)
-  animals_count = count_feature_number(data, "animals", year)
-  use_sex_count = count_feature_number(data, "use_sex", year)
+  funny_count = count_attribute_number(data, "funny", year) 
+  show_quickly_count = count_attribute_number(data, "show_product_quickly", year)
+  patriotic_count = count_attribute_number(data, "patriotic", year)
+  celebrity_count = count_attribute_number(data, "celebrity", year)
+  danger_count = count_attribute_number(data, "danger", year)
+  animals_count = count_attribute_number(data, "animals", year)
+  use_sex_count = count_attribute_number(data, "use_sex", year)
   
   year_value <- rep(year, 7)
-  count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
+  count_of_attribute <- c(funny_count, show_quickly_count, patriotic_count, 
                         celebrity_count, danger_count, animals_count, 
                         use_sex_count)
-  features <- c("funny", "show_product_quickly", "patriotic", 
-                "celebrity", "danger", "animals", "use_sex")
-  year_table <- cbind(year_value, count_of_feature, features)
+  attributes <- c("Funny", "Show product quickly", "Patriotic", 
+                "Celebrity", "Danger", "Animals", "Use sex")
+  year_table <- cbind(year_value, count_of_attribute, attributes)
   year_df <- as.data.frame(year_table)
   return(year_df)
 }
-<<<<<<< HEAD
-=======
 ```
 
 ``` r
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 # Then, using the "appender" function below to get the final dataframe for 
 ## all years from 2000 to 2020. 
 appender <- function(data){
@@ -182,55 +108,23 @@ appender <- function(data){
   }
   return(year_general_df)
 }
-<<<<<<< HEAD
+```
+
+``` r
 # Use the function and get our desired plot
 youtube1 <- youtube
-year_feature_df <- appender(youtube1)
-=======
-```
-
-``` r
-# Use the function and get our desired plot
-year_feature_df <- appender(youtube)
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
-year_feature <- year_feature_df %>%
+year_attribute_df <- appender(youtube1)
+year_attribute <- year_attribute_df %>%
   mutate(
     year_value = as.numeric(as.character(year_value)),
-    count_of_feature = as.numeric(as.character(count_of_feature))
+    count_of_attribute = as.numeric(as.character(count_of_attribute))
   ) %>%
-  group_by(year_value, features) %>%
-  summarise(n = sum(count_of_feature)) %>%
+  group_by(year_value, attributes) %>%
+  summarise(n = sum(count_of_attribute), .groups = "drop_last") %>%
   mutate(percentage = n / sum(n))
-```
 
-    ## `summarise()` has grouped output by 'year_value'. You can override using the `.groups` argument.
-
-``` r
-<<<<<<< HEAD
-year_feature
-```
-
-    ## # A tibble: 147 × 4
-    ## # Groups:   year_value [21]
-    ##    year_value features                 n percentage
-    ##         <dbl> <fct>                <dbl>      <dbl>
-    ##  1       2000 animals                  4     0.182 
-    ##  2       2000 celebrity                0     0     
-    ##  3       2000 danger                   4     0.182 
-    ##  4       2000 funny                    8     0.364 
-    ##  5       2000 patriotic                0     0     
-    ##  6       2000 show_product_quickly     5     0.227 
-    ##  7       2000 use_sex                  1     0.0455
-    ##  8       2001 animals                  3     0.0882
-    ##  9       2001 celebrity                6     0.176 
-    ## 10       2001 danger                   4     0.118 
-    ## # … with 137 more rows
-
-``` r
-=======
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 # Plot stacked area chart
-ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
+ggplot(year_attribute, aes(x = year_value, y = percentage, fill = attributes)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
     scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, 
                                               prefix = "", suffix = "%", 
@@ -240,51 +134,41 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
     labs(
       x = "Year", 
       y = "Percentage", 
-      fill = "Features",
-      title = "Percentage comparison among video features in\nSuperbowl commercials over years (2000~2020)",
-      subtitle = "By video features"
+      fill = "Attributes",
+      title = "Percentage comparison among video attributes in\nSuperbowl commercials over years (2000~2020)",
+      subtitle = "By video attributes"
     ) + 
     theme_ipsum() +
     scale_fill_brewer(palette = "Dark2") +
     theme(
-      plot.title = element_text(hjust = 0, size = 13)
+      plot.title = element_text(hjust = 0, size = 13, face = "plain")
     )
 ```
 
 ![](README_files/figure-gfm/STACKED-BAR-CHART-1.png)<!-- -->
 
-<<<<<<< HEAD
-``` r
-# create compare function for different 
-# Function was written with the help of TA
-=======
 Plot 2:
 
 ``` r
-# create compare function for different categories
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
+# create compare function for different 
+# Function was written with the help of TA
 create_compare <- function(varname, full_data) {
   full_data <- full_data %>% 
     # drop N/A value for key variables 
     drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
-    # create new variables for preference, dislike, engagement, and features
+    # create new variables for preference, dislike, engagement, and attributes
     mutate(like = like_count / view_count,
            dislike = dislike_count / view_count,
            engage = comment_count / view_count,
-           feature = as_label(enquo(varname))) %>% 
-    select({{varname}}, like, dislike, engage, feature, year) %>%
+           attribute = as_label(enquo(varname))) %>% 
+    select({{varname}}, like, dislike, engage, attribute, year) %>%
     rename(val = as_label(enquo(varname)))
   return(full_data)
 }
 ```
 
-<<<<<<< HEAD
-=======
-(Function was written with the help of TA)
-
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 ``` r
-# create a new data frame that contains key variables from above 
+# create a new data frame that contains key variables
 all_compare <- rbind(create_compare(funny, youtube),
                      create_compare(danger, youtube),
                      create_compare(show_product_quickly, youtube),
@@ -293,34 +177,35 @@ all_compare <- rbind(create_compare(funny, youtube),
                      create_compare(animals, youtube),
                      create_compare(use_sex, youtube)) %>% 
   # change variable names to be more readable
-  mutate(feature = recode(feature, 'animals' = 'Animals', 
+  mutate(attribute = recode(attribute, 'animals' = 'Animals', 
                           'celebrity' = 'Celebrity', 
                           'danger' = 'Danger',
                           'funny' = 'Funny',
                           'patriotic' = 'Patriotic',
                           'show_product_quickly' = 'Show product quickly',
                           'use_sex' = 'Use sexuality')) %>% 
-  group_by(year, feature, val) %>% 
+  group_by(year, attribute, val) %>% 
   summarise(mean_like = mean(like),
-            mean_engage = mean(engage))
+            mean_engage = mean(engage),
+            .groups = "drop")
 ```
 
-    ## `summarise()` has grouped output by 'year', 'feature'. You can override using the `.groups` argument.
-
 ``` r
+# plotting like vs. year
 ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
   geom_line(aes(color = val)) + 
   labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video features and year",
+       subtitle = "By video attributes and year",
        x = "Year of Superbowl",
        y = "Average ratio of likes over views") +
-  facet_wrap(~feature) +
-  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
-  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+  facet_wrap(~attribute) +
+  scale_color_manual("attribute", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100,
+                                            prefix = "",
                                             suffix = "%", big.mark = " ",
                                             decimal.mark = ".",
                                             trim = TRUE)) +
-  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020)) + 
   theme_minimal() +
   theme(axis.title.x = element_text(hjust = 0.5),
         axis.title.y = element_text(margin = margin(r = 20),
@@ -329,24 +214,22 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
         legend.position = c(0.95, 0.1),
         legend.title = element_blank())
 ```
-
-    ## Warning: Continuous limits supplied to discrete scale.
-    ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 
 ![](README_files/figure-gfm/all_compare-1.png)<!-- -->
 
 ``` r
+# plotting comment vs. year
 ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
   geom_line(aes(color = val)) + 
   labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video features and year",
+       subtitle = "By video attributes and year",
        x = "Year of Superbowl",
        y = "Average ratio of comments over views") +
-  facet_wrap(~feature) +
-  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  facet_wrap(~attribute) +
+  scale_color_manual("attribute", values = c("#808080", "#FF0000")) +
   scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
                                             suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
-  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020)) + 
   theme_minimal() +
   theme(axis.title.x = element_text(hjust = 0.5),
         axis.title.y = element_text(margin = margin(r = 20),
@@ -355,80 +238,52 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) +
         legend.position = c(0.95, 0.1),
         legend.title = element_blank())
 ```
-
-    ## Warning: Continuous limits supplied to discrete scale.
-    ## Did you mean `limits = factor(...)` or `scale_*_continuous()`?
 
 ![](README_files/figure-gfm/engagement_plot-1.png)<!-- -->
 
 ### Discussion
 
-In the stacked area chart, the percentage or proportion of each video
-feature is calculated by first counting the total number of TRUE-valued
-Boolean variable in each year (“funny”, “patriotic”, etc.), and then
-generate a dataframe with all 21 years together. Thus, we should focus
-on the width of each color bands, instead of trying to interpret the
-lines. Here, we can see that over the years, `funny` and
-`show_product_quickly` take up the highest proportion among the seven
-video features. However, both of them are showing a decreasing trend
-when it’s around 2020. In fact, other features, such as `patriotic` and
-`use_sex`, experiences decreases recently. And `celebrity` is,
-nevertheless, having an increasing relative proportion. Feature
-`patriotic` takes up the least proportion overall, but it reaches its
-peak proportion around 2017.
+Thus, we should focus on the width of each color bands, instead of
+trying to interpret the lines. Here, we can see that over the years,
+`funny` and `show_product_quickly` take up the highest proportion among
+the seven video attributes. However, both of them are showing a
+decreasing trend when it’s around 2020. In fact, other attributes, such
+as `patriotic` and `use_sex`, experiences decreases recently. And
+`celebrity` is, nevertheless, having an increasing relative proportion.
+attribute `patriotic` takes up the least proportion overall, but it
+reaches its peak proportion around 2017.
 
-For line plots, we first look at audience preference of various features
-in ads. From 2000 to 2020, the ads that contain dangerous elements are
-getting more likes than ads thatdo not contain dangerous elements. There
-is no obvious trend that the audience strongly prefer a specific feature
-other than `danger` over the years.In certain years, audience feel
-strongly about ads that contain specific features. In 2010, ads that
-contain `animals` element are liked more than 3 times compared to ads
-that do not contain animals. Same observation is shown for ads
-containing `patriotic` element in 2010. However, from 2017 to 2020, ads
-that contain `patriotic` content become less liked. Ads that use
-sexuality are far more liked in 2004 but are less liked in 2015. In
+For line plots, we first look at audience preference of various
+attributes in ads. From 2000 to 2020, the ads that contain dangerous
+elements are getting more likes than ads that do not contain dangerous
+elements. There is no obvious trend that the audience strongly prefer a
+specific attribute other than `danger` over the years.In certain years,
+audience feel strongly about ads that contain specific attributes. In
+2010, ads that contain `animals` element are liked more than 3 times
+compared to ads that do not contain animals. Same observation is shown
+for ads containing `patriotic` element in 2010. However, from 2017 to
+2020, ads that contain `patriotic` content become less liked. Ads that
+use sexuality are far more liked in 2004 but are less liked in 2015. In
 2002, the ads that have no humorous element are liked almost 3 times as
 ads that have humorous element.
-<<<<<<< HEAD
 
 Then, we look at what kinds of ads elicit the audience to engage by
-commenting. In general, the engagement rate is pretty low. Most ads
-receive almost no comments. However, in 2004 specifically there is are
-significant differences between engagement rate for all features. Ads
-that contain `animal`, `funny`, show product quickly, or use sexuality
-shows higher engagement compared the ads that don’t contain these
-features. On the other hand, ads that don’t contain `celebrity`,
-`patriotic`, or `danger` tend to have higher engagement rates.
+commenting. In general, the engagement rate is pretty low. However, in
+2004 specifically there is are significant differences between
+engagement rate for all attributes. Ads that contain `animal`, `funny`,
+show product quickly, or use sexuality shows higher engagement compared
+the ads that don’t contain these attributes. On the other hand, ads that
+don’t contain `celebrity`, `patriotic`, or `danger` tend to have higher
+engagement rates.
 
 The year variable used here denotes the Superbowl year where the
 commercial was shown. However, some commercials have a different
 published date on Youtube. Furthermore, the youtube videos have been
-collected from random Youtube users instead of influncers or offial
+collected from random Youtube users instead of influencers or official
 commercial accounts. Therefore, the views, likes, and engagement also
 depend on the account itself.
 
 ## Question 2 How do election year ads differ from non-election year ads in terms of content and description?
-=======
-
-Then, we look at what kinds of ads elicit the audience to engage by
-commenting. In general, the engagement rate is pretty low. Most ads
-receive almost no comments. However, in 2004 specifically there is are
-significant differences between engagement rate for all features. Ads
-that contain `animal`, `funny`, show product quickly, or use sexuality
-shows higher engagement compared the ads that don’t contain these
-features. On the other hand, ads that don’t contain `celebrity`,
-`patriotic`, or `danger` tend to have higher engagement rates.
-
-The year variable used here denotes the Superbowl year where the
-commercial was shown. However, some commercials have a different
-published date on Youtube. Furthermore, the youtube videos have been
-collected from random Youtube users instead of influncers or offial
-commercial accounts. Therefore, the views, likes, and engagement also
-depend on the account itself.
-
-## Question 2: How do election year ads differ from non-election year ads in terms of content and description?
->>>>>>> e47061b4f4aa15850cf8cf98ad938aa01baec986
 
 ### Introduction
 
@@ -459,7 +314,7 @@ char for top 10-20 words. However, we decided to opt for the word cloud
 since it provided more information in terms of relative occurrences of
 all the words being used (by size). Creating the word cloud involved
 cleaning the text (for e.g turning all words lower, removing
-punctuation, removing numbers)which was done by the `tm` library. We
+punctuation, removing numbers) which was done by the `tm` library. We
 also performed sentiment analysis on the words using the
 `get_sentiment()` function and colored the word cloud based on the
 words’ sentiment score.
@@ -583,8 +438,6 @@ non_election_df %>%
 
 ![](README_files/figure-gfm/non-election-wordcloud-viz-1.png)<!-- -->
 
-Based on the two word clouds above,
-
 ``` r
 # Creating variable with election, using pivot_longer to get attributes in the
 # same column, and creating a percentage variable
@@ -636,7 +489,7 @@ no_election_yr %>%
   ) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_minimal()
+  theme_minimal() 
 ```
 
 ![](README_files/figure-gfm/non-election-col-plot-1.png)<!-- -->
@@ -667,7 +520,8 @@ content of ads was very similar in election and non-election years.
 However, it was interesting to note that `use_sex` attribute dropped
 from 14% in non-election years to 9% in election years. While this could
 be indicative of a slight variation in content, it more more likely that
-this change was a coincidence.
+this change was a coincidence rather than a manifestation of a cultural
+shift.
 
 ## Presentation
 
