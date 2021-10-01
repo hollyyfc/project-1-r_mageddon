@@ -583,32 +583,36 @@ no_election_yr %>%
 
 ### Discussion
 
-We can divide the discussion of our visualizations into two parts:
-comparison by description and comparison by content.
+Question 1 includes two parts: ads attribute proportion and audience
+preferences. We first looked at audience preference of various
+attributes in ads. In certain years, audience feel strongly about ads
+that contain specific attributes. In 2010, ads that contain `animals`
+element are liked more than 3 times compared to ads that do not contain
+animals. Ads that use sexuality are far more liked in 2004 but are less
+liked in 2015. In 2002, the ads that have no humorous element are liked
+almost 3 times as ads that have humorous element.
 
-When comparing our two words clouds, it immediately becomes clear that
-there is some overlap in the words used in Superbowl Ad titles. These
-include, winner, new, and nfl. Similarly, there does not seem to be any
-major difference in the overall sentiment makeup of these words. We can
-gauge this by observing that both the word clouds have a few blue words
-(indicating positive sentiment), very few yellow words (indicating
-negative sentiment), and majority brown words (indicating neutral
-sentiment). This goes on to indicate that there is very little
-difference in the titles of superbowl ads in election years compared to
-non-election years. This result was surprising since our team was
-expecting the election titles to contain more patriotic words such as
-“America”, “Freedom”, and “Liberty” but it appears as if the ad titles
-are not significantly affected by election and non-election years.
+The stacked area chart shows changes of the proportion of ads attributes
+over the years. `funny` and `show_product_quickly` take up the highest
+proportion among the seven video attributes. `patriotic` takes up the
+least proportion overall. In fact, most points of intersection, which
+represents no use of the corresponding attribute in one year, appear in
+the `patriotic` section.
 
-We observed a similar relation when analyzing the content of election
-and non-election year ads. For both these categories, there seemed to be
-a marginal difference in the attribute makeup, indicating that even the
-content of ads was very similar in election and non-election years.
-However, it was interesting to note that `use_sex` attribute dropped
-from 14% in non-election years to 9% in election years. While this could
-be indicative of a slight variation in content, it more more likely that
-this change was a coincidence rather than a manifestation of a cultural
-shift.
+Comparing the line graphs with the stacked area plot, we discover
+interesting matches and unmatches between attributes proportion and
+audience reactions toward them. For example, a corresponding match
+appears in attribute `celebrity`, where celebrity-included ads become
+popular since 2015, which coincides with the increasing audience
+preference. However, things are not always matched. When the proportion
+of `funny` videos grow from 2000 to 2003, audience tend to prefer the
+videos that do not contain humor. Similarly, `danger` in the last 5
+years has narrowed its width in the stacked area chart while audience
+tends to hit like more often for ads containing danger. There can be
+many underlying reasons, but our guesses reside on the different
+expectations between audience and ad companies, or relevant regulations
+and policies that prevent companies from catering to their audience all
+the time.
 
 ## Presentation
 
