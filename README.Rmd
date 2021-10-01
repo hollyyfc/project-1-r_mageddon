@@ -546,7 +546,13 @@ election_yr %>%
   ) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_minimal()
+  theme_minimal()+
+  scale_y_discrete(labels = rev(c("Use Sex",
+                              "Patriotic",
+                              "Funny",
+                              "Danger",
+                              "Celebrity",
+                              "Animals")))
 ```
 
 
@@ -579,7 +585,13 @@ no_election_yr %>%
   ) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_minimal() 
+  theme_minimal() +
+  scale_y_discrete(labels = rev(c("Use Sex",
+                              "Patriotic",
+                              "Funny",
+                              "Danger",
+                              "Celebrity",
+                              "Animals")))
 ```
 
 

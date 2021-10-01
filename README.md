@@ -532,7 +532,13 @@ election_yr %>%
   ) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_minimal()
+  theme_minimal()+
+  scale_y_discrete(labels = rev(c("Use Sex",
+                              "Patriotic",
+                              "Funny",
+                              "Danger",
+                              "Celebrity",
+                              "Animals")))
 ```
 
 ![](README_files/figure-gfm/election-col-plot-1.png)<!-- -->
@@ -564,7 +570,13 @@ no_election_yr %>%
   ) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_minimal() 
+  theme_minimal() +
+  scale_y_discrete(labels = rev(c("Use Sex",
+                              "Patriotic",
+                              "Funny",
+                              "Danger",
+                              "Celebrity",
+                              "Animals")))
 ```
 
 ![](README_files/figure-gfm/non-election-col-plot-1.png)<!-- -->
