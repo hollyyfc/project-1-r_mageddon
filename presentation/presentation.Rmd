@@ -77,7 +77,6 @@ such changes?
 ## Any trends in how the ads change over the years in terms of content, audience preferences and engagement?
 
 ```{r STACKED-BAR-CHART, echo = FALSE, warning = FALSE, message=FALSE}
-youtube1 <- youtube
 
 # First, create a function that returns total count of a specific feature in one year.
 count_feature_number <- function(data, feature_name, desired_year){
@@ -107,8 +106,8 @@ generator <- function(data, year){
   year_value <- rep(year, 7)
   count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
                         celebrity_count, danger_count, animals_count, use_sex_count)
-  features <- c("funny", "show_product_quickly", "patriotic", 
-                "celebrity", "danger", "animals", "use_sex")
+  features <- c("Funny", "Show product quickly", "Patriotic", 
+                "Celebrity", "Danger", "Animals", "Use sex")
   year_table <- cbind(year_value, count_of_feature, features)
   year_df <- as.data.frame(year_table)
   return(year_df)
@@ -128,7 +127,7 @@ appender <- function(data){
 
 
 # Use the function and get our desired plot
-year_feature_df <- appender(youtube1)
+year_feature_df <- appender(youtube)
 
 year_feature <- year_feature_df %>%
   mutate(
@@ -145,6 +144,11 @@ year_feature <- year_feature_df %>%
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
+    scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, 
+                                              prefix = "", suffix = "%", 
+                                              big.mark = " ", 
+                                              decimal.mark = ".", 
+                                              trim = TRUE)) +
     labs(
       x = "Year", 
       y = "Percentage", 
@@ -153,6 +157,7 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
       subtitle = "By video features"
     ) + 
     theme_ipsum() +
+    scale_fill_brewer(palette = "Dark2") +
     theme(
       plot.title = element_text(hjust = 0, size = 13)
     )
