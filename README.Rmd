@@ -213,7 +213,7 @@ all_compare <- rbind(create_compare(funny, youtube),
 ```
 
 
-```{r all_compare, out.width = "80%"}
+```{r all_compare}
 # plotting like vs. year
 ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
   geom_line(aes(color = val)) + 

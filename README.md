@@ -216,7 +216,7 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
         plot.title = element_text(size = 12))
 ```
 
-<img src="README_files/figure-gfm/all_compare-1.png" width="80%" />
+![](README_files/figure-gfm/all_compare-1.png)<!-- -->
 
 ``` r
 # plotting comment vs. year
