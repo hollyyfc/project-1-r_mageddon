@@ -317,7 +317,7 @@ election_df %>%
 ```
 ]
 .pull-right[
-```{r non-election-wordcloud-data-prep, echo = FALSE, warning = FALSE}
+```{r non-election-wordcloud-data-prep, echo = FALSE, warning = FALSE, eval = FALSE}
 # Isolating the title variable
 no_election_title <- youtube %>%
   filter(election_years == 0) %>%
@@ -357,7 +357,7 @@ non_election_df <- non_election_df %>%
 ```
 
 
-``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 10, fig.height = 11, echo = FALSE, warning = FALSE}
+``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 10, fig.height = 11, echo = FALSE, warning = FALSE, eval = FALSE}
 non_election_df %>% 
   ggplot(aes(
     label = word,
