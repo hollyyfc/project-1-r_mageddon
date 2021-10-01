@@ -144,13 +144,15 @@ no_election_yr %>%
                               "Animals")))
 
 ```
+1. Marginal difference in Patriotic 
+2. Change in Use Sex
+
 ]
+
 
 
 ---
 
-
-## How do election year ads differ from non-election year ads in terms of content and description?
 
 .center[
 ``` {r data-prep-election-wordcloud, echo = FALSE, warning = FALSE}
@@ -249,7 +251,7 @@ non_election_df <- non_election_df %>%
 ```
 
 
-``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 10, fig.height = 11, echo = FALSE, warning = FALSE}
+``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 10, fig.height = 8, echo = FALSE, warning = FALSE, cache = TRUE}
 no_elec_wordC <- non_election_df %>%
   ggplot(aes(
     label = word,
