@@ -296,7 +296,7 @@ election_df <- election_df %>%
   mutate(sentiment = get_sentiment(word,"syuzhet"))
 ```
 
-``` {r election-wordcloud-viz, warning = FALSE, out.width = "90%", fig.width = 8, fig.height = 9, echo = FALSE}
+``` {r election-wordcloud-viz, warning = FALSE, out.width = "90%", fig.width = 10, fig.height = 11, echo = FALSE}
 election_df %>%
   ggplot(aes(
     label = word,
@@ -357,7 +357,7 @@ non_election_df <- non_election_df %>%
 ```
 
 
-``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 8, fig.height = 9, echo = FALSE, warning = FALSE}
+``` {r non-election-wordcloud-viz, out.width = "90%", fig.width = 10, fig.height = 11, echo = FALSE, warning = FALSE}
 non_election_df %>% 
   ggplot(aes(
     label = word,
@@ -394,7 +394,7 @@ election_yr <- youtube %>%
 ```
 
 .pull-left[
-``` {r election-col-plot, out.width = "90%", fig.width = 9, fig.height = 8, echo = FALSE, warning = FALSE}
+``` {r election-col-plot, out.width = "90%", fig.width = 11, fig.height = 11, echo = FALSE, warning = FALSE}
 # Creating the plot
 election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
@@ -425,7 +425,7 @@ no_election_yr <- youtube %>%
 ```
 
 .pull-right[
-```{r non-election-col-plot, out.width = "90%", fig.width = 9, fig.height = 8, echo = FALSE, warning = FALSE}
+```{r non-election-col-plot, out.width = "90%", fig.width = 11, fig.height = 11, echo = FALSE, warning = FALSE}
 # No Election year col vizualization
 no_election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
