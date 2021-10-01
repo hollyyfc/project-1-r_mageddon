@@ -4,19 +4,38 @@ author: "Holly Cui"
 date: "9/29/2021"
 output: github_document
 ---
+## Question 1 <- Update title to relate to the question you’re answering
+
 ### Introduction
-Introduction to the question and what parts of the dataset are necessary to answer the question. Also discuss why you’re interested in this question.
 
-### Approach 
-...We also used a stacked area chart to see how the proportion of each feature change
-over the years. A stacked area chart is similarly plotted as a stacked bar plot, but with
-lines connecting the elements with same group, which is visually compatible when we plan to 
-have year(time variable) as our x axis. More specifically, over the years on the x axis, we 
-can see the relative percentage change of each video feature on the y axis with areas divided 
-by lines linking them together. The percentage, or proportion, of each feature is calculated
-by first counting the total number of TRUE-valued Boolean variable in each year ("funny", 
-"patriotic", etc.), and then generate a dataframe with all 21 years together. 
+We want to explore the trends in how the ads change over the years in terms of content, 
+audience preferences, and engagement. To analyze the change in content we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,`show_product_quickly`, `celebrity`, and `animals`. 
+To explore audience preference and engagement, `like_count`, `comment_count`, and `view_count` are 
+used to calculate ratio of like/engagement over total views.
 
+Many things have changed in the first 20 years of the 21st century. There are life science breakthroughs, 
+political conflicts, feminist movements, etc. Therefore, we want to see if people’s reaction to Super Bowl 
+commercials reflect the changes in their lifestyles and thoughts over the years. The changes in the ads 
+themselves may also tell how companies are reacting to audience preferences.
+
+### Approach
+
+We first used a stacked area chart to see how the proportion of each video 
+feature changes over years. Here, a stacked area chart is used because, with 
+continuous lines connecting and separating the elements in same group, it is 
+visually compatible when we plan to have year (a time variable) as our x axis.
+More specifically, over the years on the x axis, we can compare the relative 
+percentage change of each feature on the y axis with areas divided by lines 
+linking them together. In the stacked area chart, the percentage or proportion of each video feature is 
+calculated by first counting the total number of TRUE-valued Boolean variable in 
+each year ("funny", "patriotic", etc.), and then generate a dataframe with all 21 
+years together. 
+
+First, we used a line graphs faceted by `feature`, a variable that is created using
+all logical variables in the data set. The faceted line graph is suitable for time-dependent
+changes by each categorical variable. Because the logical variables are either true or
+false, 2 different lines in each sub-plot clearly show how the trends (audience
+preference in this case) differ if an ad contains a feature or not.
 
 ```{r load libraries}
 library(tidyverse)
@@ -25,13 +44,20 @@ library(dplyr)
 library(ggrepel)
 library(viridis)
 library(hrbrthemes)
-
 youtube <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-03-02/youtube.csv', show_col_types = FALSE)
-youtube1 <- youtube
+
+
+install.packages("wordcloud2")
 ```
+
+```{r}
+youtube <- readr::read_csv('/home/guest/Project 1/data/youtube.csv', show_col_types = FALSE)
+```
+
 
 ### Analysis
 ```{r STACKED-BAR-CHART}
+
 # First, create a function that returns total count of a specific feature in one year.
 count_feature_number <- function(data, feature_name, desired_year){
   count1 = 0
@@ -60,8 +86,8 @@ generator <- function(data, year){
   year_value <- rep(year, 7)
   count_of_feature <- c(funny_count, show_quickly_count, patriotic_count, 
                         celebrity_count, danger_count, animals_count, use_sex_count)
-  features <- c("funny", "show_product_quickly", "patriotic", 
-                "celebrity", "danger", "animals", "use_sex")
+  features <- c("Funny", "Show product quickly", "Patriotic", 
+                "Celebrity", "Danger", "Animals", "Use sex")
   year_table <- cbind(year_value, count_of_feature, features)
   year_df <- as.data.frame(year_table)
   return(year_df)
@@ -81,7 +107,7 @@ appender <- function(data){
 
 
 # Use the function and get our desired plot
-year_feature_df <- appender(youtube1)
+year_feature_df <- appender(youtube)
 
 year_feature <- year_feature_df %>%
   mutate(
@@ -92,11 +118,14 @@ year_feature <- year_feature_df %>%
   summarise(n = sum(count_of_feature)) %>%
   mutate(percentage = n / sum(n))
 
-year_feature
-
 # Plot stacked area chart
 ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
     geom_area(alpha=0.6 , size=.5, colour="white") +
+    scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, 
+                                              prefix = "", suffix = "%", 
+                                              big.mark = " ", 
+                                              decimal.mark = ".", 
+                                              trim = TRUE)) +
     labs(
       x = "Year", 
       y = "Percentage", 
@@ -105,11 +134,10 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
       subtitle = "By video features"
     ) + 
     theme_ipsum() +
+    scale_fill_brewer(palette = "Dark2") +
     theme(
       plot.title = element_text(hjust = 0, size = 13)
     )
-  
-
 
 ```
 
@@ -216,27 +244,46 @@ ggplot(youtube_pie_df, aes(x="", y=count, fill=category)) +
 ```
 
 ### Discussion
-In the stacked area plot, we should focus on the width of each color bands, instead
-of trying to interpret the lines. Here, we can see that over the years, `funny` and 
-`show_product_quickly` take up the highest proportion among the seven video features.
 
+Since question 1 includes two parts: ads contents and audience preferences, our 
+analysis also use a binary approach. 
 
+We first looked at audience preference of various attributes in ads. 
+In certain years, audience feel strongly about ads that contain specific attributes.
+In 2010, ads that contain `animals` element are liked more than 3 times compared 
+to ads that do not contain animals. Same observation is shown for ads containing
+`patriotic` element in 2010. However, from 2017 to 2020, ads that contain `patriotic`
+content become less liked. Ads that use sexuality are far more liked in 2004 but 
+are less liked in 2015. In 2002, the ads that have no humorous element are liked 
+almost 3 times as ads that have humorous element. 
 
+In the stacked area chart, we get information from the objective nature of the ads.
+Over the years, `funny` and `show_product_quickly` take up the highest proportion 
+among the seven video attributes. `patriotic` takes up the least proportion 
+overall. In fact, most points of intersection, which represents no use of the 
+corresponding attribute in one year, appear in the `patriotic` section.
+`danger` and `celebrity` share relatively small proportion among all attributes 
+stably over years.  
 
+Comparing the line graphs with the stacked area plot, we discover interesting 
+matches and unmatches between attributes proportion and audience reactions 
+toward them. For example, a corresponding match appears in attribute `celebrity`,
+where celebrity-included ads become popular since 2015, which coincides with the 
+increasing audience preference. However, things are not always matched. When 
+the proportion of `funny` videos grow from 2000 to 2003, audience tend to 
+prefer the videos that do not contain humor. Similarly, `danger` in the last 5 
+years has narrowed its width in the stacked area chart while audience tends to 
+hit like more often for ads containing danger. There can be many underlying 
+reasons, but our guesses reside on the different expectations between audience 
+and ad companies, or relevant regulations and policies that prevent companies 
+from catering to their audience all the time.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+A qualification regarding our dataset is that the variable `year` denotes the 
+Superbowl year where the commercial was shown. However, some commercials have 
+a different published date on Youtube. Furthermore, the youtube videos have been
+collected from random Youtube users instead of influencers or official commercial 
+accounts. Therefore, the views, likes, and engagement an ad receives also depend 
+on the uploader itself.
 
 
 
