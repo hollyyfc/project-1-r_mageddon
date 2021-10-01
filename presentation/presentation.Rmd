@@ -211,7 +211,7 @@ all_compare <- rbind(create_compare(funny, youtube),
 
 ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
   geom_line(aes(color = val)) + 
-  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+  labs(title = "Audience preferences for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video features and year",
        x = "Year of Superbowl",
        y = "Average ratio of likes over views") +
@@ -236,7 +236,7 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
 ```{r engagement_plot, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE}
 ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
   geom_line(aes(color = val)) + 
-  labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+  labs(title = "Audience engagement for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video features and year",
        x = "Year of Superbowl",
        y = "Average ratio of comments over views") +

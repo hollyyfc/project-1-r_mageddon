@@ -194,7 +194,7 @@ all_compare <- rbind(create_compare(funny, youtube),
 # plotting like vs. year
 ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
   geom_line(aes(color = val)) + 
-  labs(title = "The rate of audience hitting 'like' for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+  labs(title = "Audience preferences for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video attributes and year",
        x = "Year of Superbowl",
        y = "Average ratio of likes over views") +
@@ -212,16 +212,17 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
                                     hjust = 0.5),
         panel.spacing = unit(1.5, "lines"),
         legend.position = c(0.95, 0.1),
-        legend.title = element_blank())
+        legend.title = element_blank(),
+        plot.title = element_text(size = 12))
 ```
 
-![](README_files/figure-gfm/all_compare-1.png)<!-- -->
+<img src="README_files/figure-gfm/all_compare-1.png" width="80%" />
 
 ``` r
 # plotting comment vs. year
 ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
   geom_line(aes(color = val)) + 
-  labs(title = "The rate of audience comment for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+  labs(title = "Audience engagement for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
        subtitle = "By video attributes and year",
        x = "Year of Superbowl",
        y = "Average ratio of comments over views") +
@@ -236,7 +237,8 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) +
                                     hjust = 0.5),
         panel.spacing = unit(1.5, "lines"),
         legend.position = c(0.95, 0.1),
-        legend.title = element_blank())
+        legend.title = element_blank(),
+        plot.title = element_text(size = 12))
 ```
 
 ![](README_files/figure-gfm/engagement_plot-1.png)<!-- -->
@@ -248,7 +250,7 @@ trying to interpret the lines. Here, we can see that over the years,
 `funny` and `show_product_quickly` take up the highest proportion among
 the seven video attributes. However, both of them are showing a
 decreasing trend when it’s around 2020. In fact, other attributes, such
-as `patriotic` and `use_sex`, experiences decreases recently. And
+as `patriotic` and `use_sex`, experiencing decreases recently. And
 `celebrity` is, nevertheless, having an increasing relative proportion.
 attribute `patriotic` takes up the least proportion overall, but it
 reaches its peak proportion around 2017.
