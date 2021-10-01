@@ -70,6 +70,10 @@ such changes?
 
 ---
 
+## Q1: What is the trend of the ads' content and audience preferences over the years?
+
+---
+
 ## What feature make the audience wants to hit 'like' for an ad?
 
 ```{r wrangling_function, echo = FALSE, warning = FALSE, message=FALSE}
@@ -134,10 +138,6 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
         legend.position = c(0.95, 0.1),
         legend.title = element_blank())
 ```
-
----
-
-## Q1: What is the trend of the ads' content and audience preferences over the years?
 
 ---
 
@@ -208,26 +208,31 @@ year_feature <- year_feature_df %>%
 
 
 ```{r plotting stacked area chart, warning = FALSE, out.width = "60%", fig.height = 5, fig.width = 7, echo = FALSE}
-# Plot stacked area chart
-ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) + 
-    geom_area(alpha=0.6 , size=.5, colour="white") +
-    scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, 
-                                              prefix = "", suffix = "%", 
-                                              big.mark = " ", 
-                                              decimal.mark = ".", 
-                                              trim = TRUE)) +
-    labs(
-      x = "Year", 
-      y = "Percentage", 
-      fill = "Features",
-      title = "Percentage comparison among video features in\nSuperbowl commercials over years (2000~2020)",
-      subtitle = "By video features"
-    ) + 
-    theme_ipsum() +
-    scale_fill_brewer(palette = "Dark2") +
-    theme(
-      plot.title = element_text(hjust = 0, size = 13)
+ggplot(year_attribute, aes(x = year_value, y = percentage, fill = attributes)) +
+  geom_area(alpha = 0.6 ,
+            size = .5,
+            colour = "white") +
+  scale_y_continuous(
+    labels = label_percent(
+      accuracy = NULL,
+      scale = 100,
+      prefix = "",
+      suffix = "%",
+      big.mark = " ",
+      decimal.mark = ".",
+      trim = TRUE
     )
+  ) +
+  labs(
+    x = "Year",
+    y = "Percentage",
+    fill = "Attributes",
+    title = "Percentage comparison among video attributes in\nSuperbowl commercials over years (2000~2020)",
+    subtitle = "By video attributes"
+  ) +
+  theme_ipsum() +
+  scale_fill_brewer(palette = "Dark2") +
+  theme(plot.title = element_text(hjust = 0, size = 13, face = "plain"))
 ```
 
 ---
