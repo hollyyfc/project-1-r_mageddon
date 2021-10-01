@@ -190,3 +190,44 @@ shown. However, some commercials have a different published date on Youtube.
 Furthermore, the youtube videos have been collected from random Youtube users 
 instead of influncers or offial commercial accounts. Therefore, the views, likes,
 and engagement also depend on the account itself.
+
+
+
+
+
+--------
+
+We first looked at audience preference of various attributes in ads. 
+In certain years, audience feel strongly about ads that contain specific attributes.
+In 2010, ads that contain `animals` element are liked more than 3 times compared 
+to ads that do not contain animals. Same observation is shown for ads containing
+`patriotic` element in 2010. However, from 2017 to 2020, ads that contain `patriotic`
+content become less liked. Ads that use sexuality are far more liked in 2004 but 
+are less liked in 2015. In 2002, the ads that have no humorous element are liked 
+almost 3 times as ads that have humorous element. 
+
+Comparing the line graphs with the stacked area plot, we can compare the changes 
+in ads attributes and audience reactions toward them. From 2012 to 2020, the ads 
+that contain dangerous elements are getting more likes than ads that do not contain 
+dangerous elements, while significantly less ads contain dangerous content since 
+2017. We think this decrease is due to stricter regulations rather than companies
+catering to audience preference. Similarly, the use of sexuality in ads experienced 
+a drop over the 20 years, while the audience' attitude toward this has fluctuated.
+Therefore, policies against relevant content might be a main reason of decrease.
+
+Over the years, `funny` and `show_product_quickly` take up the highest proportion 
+among the seven video attributes. However, when the proportion of `funny` videos
+grow from 2000 to 2003, audience tend to prefer the videos that do not contain humor.
+There can be many underlying reasons, but one of our guesses is that the
+expectation of humor is different between audience and ad companies. Also, including 
+celebrity in the ads become popular in ads since 2015, which coincides with audience
+preference. Companies might leverage the audience's love for celebrities, and the 
+ads in turn strengthens the influence of celebrities.
+
+-------
+
+The year variable used here denotes the Superbowl year where the commercial was 
+shown. However, some commercials have a different published date on Youtube.
+Furthermore, the youtube videos have been collected from random Youtube users 
+instead of influencers or official commercial accounts. Therefore, the views, likes,
+and engagement also depend on the account itself.

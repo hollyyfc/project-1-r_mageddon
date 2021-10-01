@@ -58,11 +58,6 @@ style_xaringan(
 )
 ```
 
-class: inverse, middle, center
-
-# Using xaringan
-
----
 
 ## Introduction
 
@@ -74,7 +69,74 @@ such changes?
 
 ---
 
-## Any trends in how the ads change over the years in terms of content, audience preferences and engagement?
+## What feature make the audience wants to hit 'like' for an ad?
+
+```{r wrangling_function, echo = FALSE, warning = FALSE, message=FALSE}
+# create compare function for different categories
+create_compare <- function(varname, full_data) {
+  full_data <- full_data %>% 
+    # drop N/A value for key variables 
+    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
+    # create new variables for preference, dislike, engagement, and features
+    mutate(like = like_count / view_count,
+           dislike = dislike_count / view_count,
+           engage = comment_count / view_count,
+           feature = as_label(enquo(varname))) %>% 
+    select({{varname}}, like, dislike, engage, feature, year) %>%
+    rename(val = as_label(enquo(varname)))
+  return(full_data)
+}
+
+# create a new data frame that contains key variables from above 
+all_compare <- rbind(create_compare(funny, youtube),
+                     create_compare(danger, youtube),
+                     create_compare(show_product_quickly, youtube),
+                     create_compare(patriotic, youtube),
+                     create_compare(celebrity, youtube),
+                     create_compare(animals, youtube),
+                     create_compare(use_sex, youtube)) %>% 
+  # change variable names to be more readable
+  mutate(feature = recode(feature, 'animals' = 'Animals', 
+                          'celebrity' = 'Celebrity', 
+                          'danger' = 'Danger',
+                          'funny' = 'Funny',
+                          'patriotic' = 'Patriotic',
+                          'show_product_quickly' = 'Show product quickly',
+                          'use_sex' = 'Use sexuality')) %>% 
+  group_by(year, feature, val) %>% 
+  summarise(mean_like = mean(like),
+            mean_engage = mean(engage))
+```
+
+
+```{r plot-compare, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE, message=FALSE}
+# Code hidden with echo = FALSE
+# Uses modified penguins dataset from previous chunk
+# Play around with height and width until you're happy with the look
+
+ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
+  geom_line(aes(color = val)) + 
+  labs(title = "Audience preferences for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
+       subtitle = "By video features and year",
+       x = "Year of Superbowl",
+       y = "Average ratio of likes over views") +
+  facet_wrap(~feature) +
+  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
+  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
+                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
+  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
+  theme_minimal() +
+  theme(axis.title.x = element_text(hjust = 0.5),
+        axis.title.y = element_text(margin = margin(r = 20),
+                                    hjust = 0.5),
+        panel.spacing = unit(1.5, "lines"),
+        legend.position = c(0.95, 0.1),
+        legend.title = element_blank())
+```
+
+---
+
+## Any trends in how the ads change over the years in terms of content?
 
 ```{r STACKED-BAR-CHART, echo = FALSE, warning = FALSE, message=FALSE}
 
@@ -162,100 +224,9 @@ ggplot(year_feature, aes(x = year_value, y = percentage, fill = features)) +
       plot.title = element_text(hjust = 0, size = 13)
     )
 ```
----
-
-### What feature make the audience wants to hit 'like'?
-
-```{r wrangling_function, echo = FALSE, warning = FALSE, message=FALSE}
-# create compare function for different categories
-create_compare <- function(varname, full_data) {
-  full_data <- full_data %>% 
-    # drop N/A value for key variables 
-    drop_na({{varname}}, like_count, view_count, dislike_count, comment_count) %>% 
-    # create new variables for preference, dislike, engagement, and features
-    mutate(like = like_count / view_count,
-           dislike = dislike_count / view_count,
-           engage = comment_count / view_count,
-           feature = as_label(enquo(varname))) %>% 
-    select({{varname}}, like, dislike, engage, feature, year) %>%
-    rename(val = as_label(enquo(varname)))
-  return(full_data)
-}
-
-# create a new data frame that contains key variables from above 
-all_compare <- rbind(create_compare(funny, youtube),
-                     create_compare(danger, youtube),
-                     create_compare(show_product_quickly, youtube),
-                     create_compare(patriotic, youtube),
-                     create_compare(celebrity, youtube),
-                     create_compare(animals, youtube),
-                     create_compare(use_sex, youtube)) %>% 
-  # change variable names to be more readable
-  mutate(feature = recode(feature, 'animals' = 'Animals', 
-                          'celebrity' = 'Celebrity', 
-                          'danger' = 'Danger',
-                          'funny' = 'Funny',
-                          'patriotic' = 'Patriotic',
-                          'show_product_quickly' = 'Show product quickly',
-                          'use_sex' = 'Use sexuality')) %>% 
-  group_by(year, feature, val) %>% 
-  summarise(mean_like = mean(like),
-            mean_engage = mean(engage))
-```
-
-
-```{r plot-compare, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE, message=FALSE}
-# Code hidden with echo = FALSE
-# Uses modified penguins dataset from previous chunk
-# Play around with height and width until you're happy with the look
-
-ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
-  geom_line(aes(color = val)) + 
-  labs(title = "Audience preferences for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video features and year",
-       x = "Year of Superbowl",
-       y = "Average ratio of likes over views") +
-  facet_wrap(~feature) +
-  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
-  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
-  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
-  theme_minimal() +
-  theme(axis.title.x = element_text(hjust = 0.5),
-        axis.title.y = element_text(margin = margin(r = 20),
-                                    hjust = 0.5),
-        panel.spacing = unit(1.5, "lines"),
-        legend.position = c(0.95, 0.1),
-        legend.title = element_blank())
-```
 
 ---
 
-## What feature make the audience wants to comment?
-
-```{r engagement_plot, warning = FALSE, out.width = "70%", fig.width = 8, echo = FALSE}
-ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
-  geom_line(aes(color = val)) + 
-  labs(title = "Audience engagement for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video features and year",
-       x = "Year of Superbowl",
-       y = "Average ratio of comments over views") +
-  facet_wrap(~feature) +
-  scale_color_manual("Feature", values = c("#808080", "#FF0000")) +
-  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
-  scale_x_discrete(limits=c(2000,2004,2008,2012,2016,2020)) + 
-  theme_minimal() +
-  theme(axis.title.x = element_text(hjust = 0.5),
-        axis.title.y = element_text(margin = margin(r = 20),
-                                    hjust = 0.5),
-        panel.spacing = unit(1.5, "lines"),
-        legend.position = c(0.95, 0.1),
-        legend.title = element_blank())
-```
-
-
----
 
 ## How do election year ads differ from non-election year ads in terms of content and description?
 
@@ -323,7 +294,7 @@ no_election_title <- youtube %>%
   filter(election_years == 0) %>%
   select(title)
 
-Data Wrangling steps
+# Data Wrangling steps
 docs <- VCorpus(VectorSource(no_election_title))
 docs <- docs %>%
   # Removing numbers
@@ -442,72 +413,5 @@ no_election_yr %>%
   theme_minimal()
 ```
 ]
----
 
-## Plot and text
 
-.pull-left[
-- Some text
-- goes here
-]
-.pull-right[
-]
-
----
-
-class: inverse, middle, center
-
-# A new section...
-
----
-
-## Images
-
-```{r castle, echo = FALSE, out.width = "40%", fig.align = "center", fig.cap = "Image credit: Danielle Navarro, Percolate."}
-include_graphics("img/watercolour_sys02_img32_percolate.jpg")
-```
-
-Or you can also include a full page image. See next slide.
-
----
-
-background-image: url(img/watercolour_sys02_img32_percolate.jpg)
-
----
-
-## Math Expressions
-
-You can write LaTeX math expressions inside a pair of dollar signs, e.g. &#36;\alpha+\beta$ renders $\alpha+\beta$. You can use the display style with double dollar signs:
-
-```
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-```
-
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-
-Limitations:
-
-1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
-
-1. There should not be spaces after the opening `$` or before the closing `$`.
-
-1. Math does not work on the title slide (see [#61](https://github.com/yihui/xaringan/issues/61) for a workaround).
-
----
-
-class: inverse, middle, center
-
-# Wrap up
-
----
-
-## Feeling adventurous?
-
-- Want to find out more about `xaringan`? See https://slides.yihui.name/xaringan/#1.
-
-- You are welcomed to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation.
-
-- But some of you might want to play around with slide styling. The 
-`xaringanthemer` provides some solutions for this that: https://pkg.garrickadenbuie.com/xaringanthemer.
-
-- And if you want more bells and whistles, there is also `xaringanExtra`: https://pkg.garrickadenbuie.com/xaringanExtra.

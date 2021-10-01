@@ -15,7 +15,7 @@ which are represented as boolean variables. Furthermore, we are also
 given the `view_count`, `like_count`, `dislike_count`, `favorite_count`,
 `comment_count`, `description`, and `title` for each ad.
 
-## Question 1：What’s the trend in the ads’ content, audience preferences, and engagement over the years?
+## Question 1：What is the trend of the ads’ content and audience preferences over the years?
 
 ### Introduction
 
@@ -216,32 +216,7 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
         plot.title = element_text(size = 12))
 ```
 
-![](README_files/figure-gfm/all_compare-1.png)<!-- -->
-
-``` r
-# plotting comment vs. year
-ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
-  geom_line(aes(color = val)) + 
-  labs(title = "Audience engagement for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video attributes and year",
-       x = "Year of Superbowl",
-       y = "Average ratio of comments over views") +
-  facet_wrap(~attribute) +
-  scale_color_manual("attribute", values = c("#808080", "#FF0000")) +
-  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
-   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020)) + 
-  theme_minimal() +
-  theme(axis.title.x = element_text(hjust = 0.5),
-        axis.title.y = element_text(margin = margin(r = 20),
-                                    hjust = 0.5),
-        panel.spacing = unit(1.5, "lines"),
-        legend.position = c(0.95, 0.1),
-        legend.title = element_blank(),
-        plot.title = element_text(size = 12))
-```
-
-![](README_files/figure-gfm/engagement_plot-1.png)<!-- -->
+![](README_files/figure-gfm/like%20plot-1.png)<!-- -->
 
 ### Discussion
 

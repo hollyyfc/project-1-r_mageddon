@@ -40,7 +40,7 @@ Furthermore, we are also given the `view_count`, `like_count`, `dislike_count`,
 
 
 
-## Question 1：What's the trend in the ads' content, audience preferences, and engagement over the years?
+## Question 1：What is the trend of the ads' content and audience preferences over the years?
 
 ### Introduction
 Many things have changed in the first 20 years of the 21st century. There are 
@@ -55,7 +55,6 @@ we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,
 `show_product_quickly`, `celebrity`, and `animals`. To explore audience 
 preference and engagement,`like_count`, `comment_count`, and `view_count` are 
 used to calculate ratio of like/engagement over total views.
-
 
 
 
@@ -213,7 +212,7 @@ all_compare <- rbind(create_compare(funny, youtube),
 ```
 
 
-```{r all_compare}
+```{r like plot}
 # plotting like vs. year
 ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) + 
   geom_line(aes(color = val)) + 
@@ -239,29 +238,6 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
         plot.title = element_text(size = 12))
 ```
 
-
-```{r engagement_plot}
-# plotting comment vs. year
-ggplot(all_compare, aes(x = as.numeric(year), y = mean_engage)) + 
-  geom_line(aes(color = val)) + 
-  labs(title = "Audience engagement for Youtube Superbowl Commercials\nEach year from 2000 to 2020",
-       subtitle = "By video attributes and year",
-       x = "Year of Superbowl",
-       y = "Average ratio of comments over views") +
-  facet_wrap(~attribute) +
-  scale_color_manual("attribute", values = c("#808080", "#FF0000")) +
-  scale_y_continuous(labels = label_percent(accuracy = NULL, scale = 100, prefix = "",
-                                            suffix = "%", big.mark = " ", decimal.mark = ".", trim = TRUE)) +
-   scale_x_continuous(breaks=c(2000,2004,2008,2012,2016,2020)) + 
-  theme_minimal() +
-  theme(axis.title.x = element_text(hjust = 0.5),
-        axis.title.y = element_text(margin = margin(r = 20),
-                                    hjust = 0.5),
-        panel.spacing = unit(1.5, "lines"),
-        legend.position = c(0.95, 0.1),
-        legend.title = element_blank(),
-        plot.title = element_text(size = 12))
-```
 
 ### Discussion
 
