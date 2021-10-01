@@ -51,7 +51,7 @@ variable that is created using all logical variables in the data set.
 The faceted line graph is suitable for time-dependent changes by each
 categorical variable. Because the logical variables are either true or
 false, 2 different lines in each sub-plot clearly show how the trends
-(audience preference in this case) differ if an ad contains a attribute
+(audience preference in this case) differ if an ad contains an attribute
 or not.
 
 ### Analysis
