@@ -254,7 +254,7 @@ ggplot(year_attribute,
 ## Q2: How do election year ads differ from non-election year ads in terms of content and titles?
 
 ---
-### Title Comparision
+### Title Comparison
 
 .center[
 ``` {r data-prep-election-wordcloud, echo = FALSE, warning = FALSE}
@@ -392,7 +392,7 @@ election_yr <- youtube %>%
 ```
 
 
-### Content Comparision
+### Content Comparison
 
 .pull-left[
 ``` {r election-col-plot, out.width = "130%", fig.width = 15, fig.height = 20, echo = FALSE, warning = FALSE}
