@@ -12,7 +12,7 @@ Dear [TEAM NAME] -- Below is the feedback for your project. Please review carefu
 ---
 
 | Component                                 | Points earned | Points available  |
-|:                                          |: __          :|:                 :|
+|:------------------------------------------|:-------------:|:-----------------:|
 | Proposal                                  |  __           | 10                |
 | Presentation (instructor)                 |  __           | 25                |
 | Presentation (peers)                      |  __           | 5                 |
