@@ -37,7 +37,7 @@ Dear [TEAM NAME] -- Below is the feedback for your project. Please review carefu
 
 - Visualization: The visualizations are appropriate, easy to read, and properly labeled. `[_ / 4 points]`
 
-- Discussion: Discussion of results is clear and correct, and it has some depth without begin excessively long. `[_ / 4 points]`
+- Discussion: The discussion of results is clear and correct, and it has some depth without being excessively long. `[_ / 4 points]`
 
 ### Question 2
 
@@ -47,7 +47,7 @@ Dear [TEAM NAME] -- Below is the feedback for your project. Please review carefu
 
 - Visualization: The visualizations are appropriate, easy to read, and properly labeled. `[_ / 4 points]`
 
-- Discussion: Discussion of results is clear and correct, and it has some depth without begin excessively long. `[_ / 4 points]`
+- Discussion: The discussion of results is clear and correct, and it has some depth without being excessively long. `[_ / 4 points]`
 
 ## Reproducibility, style, and organization
 
