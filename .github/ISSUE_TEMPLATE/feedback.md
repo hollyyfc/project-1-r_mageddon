@@ -16,14 +16,26 @@ Dear [TEAM NAME] -- Below is the feedback for your project. Please review carefu
 | Proposal                                  |  __           | 10                |
 | Presentation (instructor)                 |  __           | 25                |
 | Presentation (peers)                      |  __           | 5                 |
-| Write-up*                                 |  __           | 30                |
-| Reproducibility, style, and organization* |  __           | 10                |
+| Write-up                                  |  __           | 30                |
+| Reproducibility, style, and organization  |  __           | 10                |
 | Within team peer evaluation               | [varies]      | 10                |
 | Between team peer evaluation              |  __           | 10                |
 
-* Details below.
-
 ---
+
+## Proposal
+
+This is your proposal score. For more on the details, see __.
+
+## Presentation (instructor)
+
+Please feel free to reach out during office hours if you have any questions about the instructor portion of your presentation score.
+
+## Presentation (peers)
+
+The following are comments from your classmates!
+
+__
 
 ## Write-up
 
@@ -58,3 +70,11 @@ Dear [TEAM NAME] -- Below is the feedback for your project. Please review carefu
 - Documents are well structured and easy to follow. No extraneous materials. `[_ / 2 points]`
 
 - All issues are closed, mostly with specific commits addressing them. `[_ / 2 points]`
+
+## Within team peer evaluation
+
+This is the average score your teammates gave you. Details can be seen in the TEAMMATES email.
+
+## Between team peer evaluation
+
+This is the score you received based on the quality of the peer review you conducted on other teams' project proposals.
