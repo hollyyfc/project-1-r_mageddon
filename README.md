@@ -3,6 +3,9 @@ commercials
 ================
 by R-Mageddon
 
+    ## Warning in system("timedatectl", intern = TRUE): running command 'timedatectl'
+    ## had status 1
+
 ## Introduction
 
 Our `youtube` dataset contains a list of ads from the 10 brands that had
@@ -241,8 +244,7 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
     x = "Year of Superbowl",
     y = "Average ratio of likes over views"
   ) +
-  facet_wrap(~ attribute) +
-  scale_color_manual("attribute", values = c("#808080", "#FF0000")) +
+  facet_wrap(~ attribute, nrow = 3) +
   scale_y_continuous(
     labels = label_percent(
       accuracy = NULL,
@@ -256,15 +258,18 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
   ) +
   scale_x_continuous(breaks = c(2000, 2004, 2008, 2012, 2016, 2020)) +
   theme_minimal() +
+  scale_color_manual("Does the ads contain\n this attribute?", 
+                     values = c("#808080", "#FF0000"),
+                     labels = c("No", "Yes")) +
   theme(
     axis.title.x = element_text(hjust = 0.5),
     axis.title.y = element_text(margin = margin(r = 20),
                                 hjust = 0.5),
     panel.spacing = unit(1.5, "lines"),
-    legend.position = c(0.95, 0.1),
-    legend.title = element_blank(),
-    plot.title = element_text(size = 12)
-  )
+    legend.position = c(0.9, 0.1),
+    plot.title = element_text(size = 12),
+    panel.grid.minor = element_blank()
+  ) 
 ```
 
 ![](README_files/figure-gfm/like%20plot-1.png)<!-- -->
