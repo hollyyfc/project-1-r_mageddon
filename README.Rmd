@@ -19,6 +19,7 @@ library(tidytext)
 library(syuzhet)
 library(stringr)
 library(textdata)
+library(patchwork)
 ```
 
 ```{r load-data, echo = FALSE, message=FALSE,warning=FALSE}
@@ -389,7 +390,7 @@ test <- youtube %>%
   filter(election_years == 1) %>%
   select(title)
 
-text_cleaner <- function(testvector,freqCheck) {
+word_cloud_viz <- function(testvector,freqCheck) {
   docs <- VCorpus(VectorSource(testvector))
   docs <- docs %>%
     # Removing numbers
@@ -434,13 +435,23 @@ text_cleaner <- function(testvector,freqCheck) {
       filter(freq >= freqCheck) %>%
     # Package to get sentiment scores for each word in the dataset
     mutate(sentiment = get_sentiment(word, "syuzhet"))
-  return(election_df)
+  retPlot <- election_df %>% 
+    ggplot(aes(
+    label = word,
+    color = sentiment,
+    size = freq,
+    angle = angle
+  )) +
+  geom_text_wordcloud() +
+  theme_minimal() +
+  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
+  return(retPlot)
   
 }
 
 ```
 
-``` {r election-wordcloud-viz}
+``` {r election-wordcloud-viz, fig.height = 10}
 
 election_1 <- youtube %>%
   filter(election_years == 1) %>%
@@ -450,21 +461,12 @@ election_0 <- youtube %>%
   filter(election_years == 0) %>%
   select(title)
 
-election_wc <- text_cleaner(election_1,1)
+election_wc <- word_cloud_viz(election_1,1)
 
-nelection_wc <- text_cleaner(election_0,2)
+nelection_wc <- word_cloud_viz(election_0,2)
 
-election_wc %>%
-  ggplot(aes(
-    label = word,
-    color = sentiment,
-    size = freq,
-    angle = angle
-  )) +
-  geom_text_wordcloud() +
+efinal <- election_wc +
   scale_radius(range = c(2, 15)) +
-  theme_minimal() +
-  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF") +
   labs(
     title = "Election Year Ad Title Word Cloud",
     subtitle = "Colored by Sentiment
@@ -473,17 +475,8 @@ election_wc %>%
       Yellower for negative sentiment"
   )
 
-nelection_wc %>%
-  ggplot(aes(
-    label = word,
-    color = sentiment,
-    size = freq,
-    angle = angle
-  )) +
-  geom_text_wordcloud() +
+nefinal <- nelection_wc +
   scale_radius(range = c(3.5, 15)) +
-  theme_minimal() +
-  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF") +
   labs(
     title = "Non-election Year Ad Title Word Cloud",
     subtitle = "Colored by Sentiment
@@ -491,6 +484,8 @@ nelection_wc %>%
       Brown for neutral sentiment
       Yellower for negative sentiment"
   ) 
+
+efinal / nefinal
 
 ```
 
@@ -534,7 +529,7 @@ elecyr <-election_yr %>%
 
 
 
-```{r non-election-col-plot}
+```{r non-election-col-plot, fig.height=5}
 # Creating variable with no election, using pivot_longer to get attributes in the
 # same column, and creating a percentage variable
 no_election_yr <- youtube %>%
@@ -556,7 +551,6 @@ nelecyr <- no_election_yr %>%
   labs(
     x = "Count",
     y = "Ad Attribute",
-    title = "Count and Proportion of Ad by Attribute",
     subtitle = "In Non-Election Years"
   ) +
   scale_fill_brewer(palette = "Dark2") +
@@ -569,8 +563,7 @@ nelecyr <- no_election_yr %>%
                               "Celebrity",
                               "Animals")))
 
-elecyr
-nelecyr
+elecyr / nelecyr
 ```
 
 
