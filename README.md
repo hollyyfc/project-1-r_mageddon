@@ -1,7 +1,6 @@
 Investigating content and audience reactions to youtube Super Bowl
 commercials
 ================
-by R-Mageddon
 
 ## Introduction
 
@@ -61,88 +60,51 @@ or not.
 Plot 1:
 
 ``` r
-# First, create a function that returns total count of a specific attribute in one year.
-count_attribute_number <-
-  function(data, attribute_name, desired_year) {
-    count1 = 0
-    for (i in seq(1, nrow(data))) {
-      if (data$year[i] == desired_year) {
-        if (data[i, attribute_name] == TRUE) {
-          count1 = count1 + 1
-        }
-      }
-    }
-    return(count1)
-  }
-```
+# First, group attributes by year and count total number of TRUE values 
+## by pivoting longer.
+all_year <- youtube %>%
+  drop_na(funny, show_product_quickly, patriotic, celebrity, danger, animals, use_sex) %>%
+  pivot_longer(cols = c(funny, show_product_quickly, patriotic, 
+                        celebrity, danger, animals, use_sex), 
+               names_to = "attribute",
+               values_to = "contain") %>%
+  filter(contain == TRUE) %>%
+  select(year, attribute, contain) %>%
+  group_by(year, attribute) %>%
+  summarise(attribute_occurence = n(), .groups = "drop")
 
-``` r
-# With help from the counter above, we define a new function that creates a 
-## generalized attribute counting dataframe for a single year.
-generator <- function(data, year) {
-  funny_count = count_attribute_number(data, "funny", year)
-  show_quickly_count = count_attribute_number(data, "show_product_quickly", year)
-  patriotic_count = count_attribute_number(data, "patriotic", year)
-  celebrity_count = count_attribute_number(data, "celebrity", year)
-  danger_count = count_attribute_number(data, "danger", year)
-  animals_count = count_attribute_number(data, "animals", year)
-  use_sex_count = count_attribute_number(data, "use_sex", year)
-  
-  year_value <- rep(year, 7)
-  count_of_attribute <-
-    c(
-      funny_count,
-      show_quickly_count,
-      patriotic_count,
-      celebrity_count,
-      danger_count,
-      animals_count,
-      use_sex_count
-    )
-  attributes <- c(
-    "Funny",
-    "Show product quickly",
-    "Patriotic",
-    "Celebrity",
-    "Danger",
-    "Animals",
-    "Use sex"
-  )
-  year_table <- cbind(year_value, count_of_attribute, attributes)
-  year_df <- as.data.frame(year_table)
-  return(year_df)
-}
-```
-
-``` r
-# Then, using the "appender" function below to get the final dataframe for 
-## all years from 2000 to 2020.
-appender <- function(data) {
-  year_general_df <- generator(data, 2000)
-  for (j in seq(2001, 2020)) {
-    year_general_df <- rbind(year_general_df,
-                             generator(data, j))
-  }
-  return(year_general_df)
-}
-```
-
-``` r
-# Use the function and get our desired plot
-youtube1 <- youtube
-year_attribute_df <- appender(youtube1)
-year_attribute <- year_attribute_df %>%
+# Change back the format to do rowwise percentage calculations.
+all_year_summary <- all_year %>%
+  pivot_wider(names_from = attribute, values_from = attribute_occurence) %>%
+  replace(is.na(.), 0) %>%
+  rowwise() %>%
   mutate(
-    year_value = as.numeric(as.character(year_value)),
-    count_of_attribute = as.numeric(as.character(count_of_attribute))
+    total = sum(c_across(animals:patriotic)),
+    across(!c(year, total), ~ .x / total)
   ) %>%
-  group_by(year_value, attributes) %>%
-  summarise(n = sum(count_of_attribute), .groups = "drop_last") %>%
-  mutate(percentage = n / sum(n))
+  rename(
+    "Animals" = "animals",
+    "Danger" = "danger",
+    "Funny" = "funny", 
+    "Show product quickly" = "show_product_quickly",
+    "Use sexuality" = "use_sex",
+    "Celebrity" = "celebrity",
+    "Patriotic" = "patriotic"
+  )
+```
 
-# Plot stacked area chart
-ggplot(year_attribute,
-       aes(x = year_value, y = percentage, fill = attributes)) +
+``` r
+# Reformat to fit the plotting step
+all_year_plot <- all_year_summary %>%
+  select(!total) %>%
+  pivot_longer(
+    cols = !year, 
+    names_to = "Attributes",
+    values_to = "Percentage")
+
+# Plot Stacked Area chart
+ggplot(all_year_plot,
+       aes(x = year, y = Percentage, fill = Attributes)) +
   geom_area(alpha = 0.6 ,
             size = .5,
             colour = "white") +
@@ -161,15 +123,14 @@ ggplot(year_attribute,
     x = "Year",
     y = "Percentage",
     fill = "Attributes",
-    title = "Percentage comparison among video attributes in\nSuperbowl commercials over years (2000~2020)",
-    subtitle = "By video attributes"
+    title = "Percentage comparison among commercial attributes in\nSuperbowl 
+    commercials over years (2000~2020)",
+    subtitle = "By attributes"
   ) +
-  theme_ipsum() +
-  scale_fill_brewer(palette = "Dark2") +
-  theme(plot.title = element_text(hjust = 0, size = 13, face = "plain"))
+  scale_fill_brewer(palette = "Dark2") 
 ```
 
-![](README_files/figure-gfm/STACKED-BAR-CHART-1.png)<!-- -->
+![](README_files/figure-gfm/Stacked_area_chart-1.png)<!-- -->
 
 Plot 2:
 
@@ -277,8 +238,7 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
 
 ### Discussion
 
-Thus, we should focus on the width of each color bands, instead of
-trying to interpret the lines. Here, we can see that over the years,
+Looking at the width of each color band, we can see that over the years,
 `funny` and `show_product_quickly` take up the highest proportion among
 the seven video attributes. However, both of them are showing a
 decreasing trend when it’s around 2020. In fact, other attributes, such
