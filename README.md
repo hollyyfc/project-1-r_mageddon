@@ -3,19 +3,19 @@ commercials
 ================
 by R-Mageddon
 
-    ## Warning in system("timedatectl", intern = TRUE): running command 'timedatectl'
-    ## had status 1
-
 ## Introduction
 
 Our `youtube` dataset contains a list of ads from the 10 brands that had
 the most advertisements in Super Bowls from 2000 to 2020, according to
-data from superbowl-ads.com, with matching videos found on YouTube. It
-was then analyzed by FiveThirtyEight staffers to come up with seven
-defining characteristics of a Super Bowl ad: `funny`, `danger`,
+data from superbowl-ads.com, with matching videos found on YouTube.
+These brands included Toyota, Bud Light, Kia, Coca-Cola, Hynudai,
+Budweiser, Pepsi, NFL, Doritos, and E-trade. It was then analyzed by the
+staff of FiveThirtyEight, an American website that focuses on opinion
+poll analysis, politics, economics, and sports blogging, to come up with
+seven defining characteristics of a Super Bowl ad: `funny`, `danger`,
 `use_sex`, `show_product_quickly`, `celebrity`, `patriotic`, `animals`,
 which are represented as boolean variables. Furthermore, we are also
-given the `view_count`, `like_count`, `dislike_count`, `favorite_count`,
+given the `view_count`, `like_count`, `dislike_count`,`favorite_count`,
 `comment_count`, `description`, and `title` for each ad.
 
 ## Question 1：What is the trend of the ads’ content and audience preferences over the years?
@@ -350,7 +350,10 @@ cleaning the text (for e.g turning all words lower, removing
 punctuation, removing numbers) which was done by the `tm` library. We
 also performed sentiment analysis on the words using the
 `get_sentiment()` function and colored the word cloud based on the
-words’ sentiment score.
+words’ sentiment score. We used the `syuzhet` library for the
+`get_sentiment` function since it assigned each word a sentiment score
+and had the widest range of words that could be assigned a score i.e
+largest word dictionary.
 
 To analyze the content aspect, we decided to opt for a column graph with
 percentage values of each content category as labels of the
@@ -371,51 +374,71 @@ youtube <- youtube %>%
 test <- youtube %>%
   filter(election_years == 1) %>%
   select(title)
-docs <- VCorpus(VectorSource(test))
-docs <- docs %>%
-  # Removing numbers
-  tm_map(removeNumbers) %>%
-  # Removing punctuation
-  tm_map(removePunctuation) %>%
-  # Removing whitespace
-  tm_map(stripWhitespace)
-docs <- tm_map(docs, content_transformer(tolower))
-docs <- tm_map(docs, removeWords, stopwords("english"))
-# Removing words that contain brand names
-docs <- tm_map(
-  docs,
-  removeWords,
-  c(
-    "super",
-    "bowl",
-    "commercial",
-    "superbowl",
-    "bud",
-    "light",
-    "budweiser",
-    "pepsi",
-    "hyundai",
-    "doritos",
-    "coke",
-    "cocacola",
-    "cola",
-    "coca",
-    "kia",
-    "toyota"
+
+text_cleaner <- function(testvector,freqCheck) {
+  docs <- VCorpus(VectorSource(testvector))
+  docs <- docs %>%
+    # Removing numbers
+    tm_map(removeNumbers) %>%
+    # Removing punctuation
+    tm_map(removePunctuation) %>%
+    # Removing whitespace
+    tm_map(stripWhitespace)
+  docs <- tm_map(docs, content_transformer(tolower))
+  docs <- tm_map(docs, removeWords, stopwords("english"))
+  # Removing words that contain brand names
+  docs <- tm_map(
+    docs,
+    removeWords,
+    c(
+      "super",
+      "bowl",
+      "commercial",
+      "superbowl",
+      "bud ",
+      "light",
+      "budweiser",
+      "pepsi",
+      "hyundai",
+      "doritos",
+      "coke",
+      "cocacola",
+      "cola",
+      "coca",
+      "kia",
+      "toyota",
+      "etrade",
+      "nfl"
+    )
   )
-)
-dtm <- TermDocumentMatrix(docs)
-matrix <- as.matrix(dtm)
-words <- sort(rowSums(matrix), decreasing = TRUE)
-election_df <- data.frame(word = names(words), freq = words)
-election_df <- election_df %>%
-  mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
-  # Package to get sentiment scores for each word in the dataset
-  mutate(sentiment = get_sentiment(word, "syuzhet"))
+  dtm <- TermDocumentMatrix(docs)
+  matrix <- as.matrix(dtm)
+  words <- sort(rowSums(matrix), decreasing = TRUE)
+  election_df <- data.frame(word = names(words), freq = words)
+  election_df <- election_df %>%
+    mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
+      filter(freq >= freqCheck) %>%
+    # Package to get sentiment scores for each word in the dataset
+    mutate(sentiment = get_sentiment(word, "syuzhet"))
+  return(election_df)
+  
+}
 ```
 
 ``` r
-election_df %>%
+election_1 <- youtube %>%
+  filter(election_years == 1) %>%
+  select(title)
+
+election_0 <- youtube %>%
+  filter(election_years == 0) %>%
+  select(title)
+
+election_wc <- text_cleaner(election_1,1)
+
+nelection_wc <- text_cleaner(election_0,2)
+
+election_wc %>%
   ggplot(aes(
     label = word,
     color = sentiment,
@@ -429,7 +452,8 @@ election_df %>%
   labs(
     title = "Election Year Ad Title Word Cloud",
     subtitle = "Colored by Sentiment
-      Bluer for postive sentiments
+      Bluer for postive sentiment
+      Brown for neutral sentiment
       Yellower for negative sentiment"
   )
 ```
@@ -437,59 +461,7 @@ election_df %>%
 ![](README_files/figure-gfm/election-wordcloud-viz-1.png)<!-- -->
 
 ``` r
-# Isolating the title variable
-no_election_title <- youtube %>%
-  filter(election_years == 0) %>%
-  select(title)
-# Data Wrangling steps
-docs <- VCorpus(VectorSource(no_election_title))
-docs <- docs %>%
-  # Removing numbers
-  tm_map(removeNumbers) %>%
-  # Removing punctuation
-  tm_map(removePunctuation) %>%
-  # Removing whitespace
-  tm_map(stripWhitespace)
-# transforming words to lowercase
-docs <- tm_map(docs, content_transformer(tolower))
-# removing words that contain brand names
-docs <- tm_map(
-  docs,
-  removeWords,
-  c(
-    "super",
-    "bowl",
-    "commercial",
-    "superbowl",
-    "bud",
-    "light",
-    "budweiser",
-    "pepsi",
-    "hyundai",
-    "doritos",
-    "coke",
-    "cocacola",
-    "cola",
-    "coca",
-    "the",
-    "kia",
-    "toyota"
-  )
-)
-# Creating df that can be used by ggwordcloud
-dtm <- TermDocumentMatrix(docs)
-matrix <- as.matrix(dtm)
-words <- sort(rowSums(matrix), decreasing = TRUE)
-non_election_df <- data.frame(word = names(words), freq = words)
-# Adding the sentiment score variable
-non_election_df <- non_election_df %>%
-  mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
-  filter(freq >= 2) %>%
-  mutate(sentiment = get_sentiment(word, "syuzhet"))
-```
-
-``` r
-non_election_df %>%
+nelection_wc %>%
   ggplot(aes(
     label = word,
     color = sentiment,
@@ -503,12 +475,13 @@ non_election_df %>%
   labs(
     title = "Non-election Year Ad Title Word Cloud",
     subtitle = "Colored by Sentiment
-      Bluer for postive sentiments
+      Bluer for postive sentiment
+      Brown for neutral sentiment
       Yellower for negative sentiment"
   ) 
 ```
 
-![](README_files/figure-gfm/non-election-wordcloud-viz-1.png)<!-- -->
+![](README_files/figure-gfm/election-wordcloud-viz-2.png)<!-- -->
 
 ``` r
 # Creating variable with election, using pivot_longer to get attributes in the
@@ -523,7 +496,7 @@ election_yr <- youtube %>%
     n
   )) * 100), "%", sep = ""))
 # Creating the plot
-election_yr %>%
+elecyr <-election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
   geom_text(aes(label = perc, color = name),
@@ -546,8 +519,6 @@ election_yr %>%
                               "Animals")))
 ```
 
-![](README_files/figure-gfm/election-col-plot-1.png)<!-- -->
-
 ``` r
 # Creating variable with no election, using pivot_longer to get attributes in the
 # same column, and creating a percentage variable
@@ -561,7 +532,7 @@ no_election_yr <- youtube %>%
     n
   )) * 100), "%", sep = ""))
 # No Election year col vizualization
-no_election_yr %>%
+nelecyr <- no_election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
   geom_text(aes(label = perc, color = name),
@@ -582,42 +553,45 @@ no_election_yr %>%
                               "Danger",
                               "Celebrity",
                               "Animals")))
+
+elecyr
 ```
 
 ![](README_files/figure-gfm/non-election-col-plot-1.png)<!-- -->
 
+``` r
+nelecyr
+```
+
+![](README_files/figure-gfm/non-election-col-plot-2.png)<!-- -->
+
 ### Discussion
 
-Question 1 includes two parts: ads attribute proportion and audience
-preferences. We first looked at audience preference of various
-attributes in ads. In certain years, audience feel strongly about ads
-that contain specific attributes. In 2010, ads that contain `animals`
-element are liked more than 3 times compared to ads that do not contain
-animals. Ads that use sexuality are far more liked in 2004 but are less
-liked in 2015. In 2002, the ads that have no humorous element are liked
-almost 3 times as ads that have humorous element.
+We can divide the discussion of our visualizations into two parts:
+comparison by description and comparison by content.
 
-The stacked area chart shows changes of the proportion of ads attributes
-over the years. `funny` and `show_product_quickly` take up the highest
-proportion among the seven video attributes. `patriotic` takes up the
-least proportion overall. In fact, most points of intersection, which
-represents no use of the corresponding attribute in one year, appear in
-the `patriotic` section.
+When comparing our two words clouds, it immediately becomes clear that
+there is some overlap in the words used in Superbowl Ad titles. These
+include, winner, new, and nfl. Similarly, there does not seem to be any
+major difference in the overall sentiment makeup of these words. We can
+gauge this by observing that both the word clouds have a few blue words
+(indicating positive sentiment), very few yellow words (indicating
+negative sentiment), and majority brown words (indicating neutral
+sentiment). This goes on to indicate that there is very little
+difference in the titles of superbowl ads in election years compared to
+non-election years. This result was surprising since our team was
+expecting the election titles to contain more patriotic words such as
+“America”, “Freedom”, and “Liberty” but it appears as if the ad titles
+are not significantly affected by election and non-election years.
 
-Comparing the line graphs with the stacked area plot, we discover
-interesting matches and unmatches between attributes proportion and
-audience reactions toward them. For example, a corresponding match
-appears in attribute `celebrity`, where celebrity-included ads become
-popular since 2015, which coincides with the increasing audience
-preference. However, things are not always matched. When the proportion
-of `funny` videos grow from 2000 to 2003, audience tend to prefer the
-videos that do not contain humor. Similarly, `danger` in the last 5
-years has narrowed its width in the stacked area chart while audience
-tends to hit like more often for ads containing danger. There can be
-many underlying reasons, but our guesses reside on the different
-expectations between audience and ad companies, or relevant regulations
-and policies that prevent companies from catering to their audience all
-the time.
+We observed a similar relation when analyzing the content of election
+and non-election year ads. For both these categories, there seemed to be
+a marginal difference in the attribute makeup, indicating that even the
+content of ads was very similar in election and non-election years.
+However, it was interesting to note that `use_sex` attribute dropped
+from 14% in non-election years to 9% in election years. While this could
+be indicative of a slight variation in content, it more more likely that
+this change was a coincidence.
 
 ## Presentation
 
