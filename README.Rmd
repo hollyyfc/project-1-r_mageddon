@@ -151,8 +151,7 @@ appender <- function(data) {
 
 ```{r STACKED-BAR-CHART}
 # Use the function and get our desired plot
-youtube1 <- youtube
-year_attribute_df <- appender(youtube1)
+year_attribute_df <- appender(youtube)
 year_attribute <- year_attribute_df %>%
   mutate(
     year_value = as.numeric(as.character(year_value)),
@@ -298,8 +297,7 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
 
 ### Discussion
 
-Thus, we should focus on the width of each color bands, instead 
-of trying to interpret the lines. Here, we can see that over the years, `funny` 
+Looking at the width of each color band, we can see that over the years, `funny` 
 and `show_product_quickly` take up the highest proportion among the seven video 
 attributes. However, both of them are showing a decreasing trend when it's around
 2020. In fact, other attributes, such as `patriotic` and `use_sex`, experiencing 
