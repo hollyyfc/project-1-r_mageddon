@@ -44,10 +44,9 @@ attribute makeup of ads has changed over time. This is achieved by first
 counting the total number of `TRUE`-valued Boolean variable in each year
 and then determining of the total `TRUE` values how many come from each
 attribute. These are then grouped by year and plotted as a stacked area
-chart. We preferred this visualization over the stacked bar chart with
-years on the y-axis since the stacked area chart makes it easier to
-identify the change, if any, in the trend of content proportions over
-the years.
+chart. We preferred this visualization over the stacked bar chart since
+the stacked area chart makes it easier to identify the change, if any,
+in the trend of content proportions over the years.
 
 For the second plot, we used a line graphs faceted by `attribute`, a
 variable that is created using all logical variables in the data set.
@@ -258,9 +257,11 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
   ) +
   scale_x_continuous(breaks = c(2000, 2004, 2008, 2012, 2016, 2020)) +
   theme_minimal() +
-  scale_color_manual("Does the ads contain\n this attribute?", 
-                     values = c("#808080", "#FF0000"),
-                     labels = c("No", "Yes")) +
+  scale_color_manual(
+    "Does the ads contain\n this attribute?",
+    values = c("#808080", "#FF0000"),
+    labels = c("No", "Yes")
+  ) +
   theme(
     axis.title.x = element_text(hjust = 0.5),
     axis.title.y = element_text(margin = margin(r = 20),
@@ -375,7 +376,7 @@ test <- youtube %>%
   filter(election_years == 1) %>%
   select(title)
 
-word_cloud_viz <- function(testvector,freqCheck) {
+word_cloud_viz <- function(testvector, freqCheck) {
   docs <- VCorpus(VectorSource(testvector))
   docs <- docs %>%
     # Removing numbers
@@ -417,19 +418,19 @@ word_cloud_viz <- function(testvector,freqCheck) {
   election_df <- data.frame(word = names(words), freq = words)
   election_df <- election_df %>%
     mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
-      filter(freq >= freqCheck) %>%
+    filter(freq >= freqCheck) %>%
     # Package to get sentiment scores for each word in the dataset
     mutate(sentiment = get_sentiment(word, "syuzhet"))
-  retPlot <- election_df %>% 
+  retPlot <- election_df %>%
     ggplot(aes(
-    label = word,
-    color = sentiment,
-    size = freq,
-    angle = angle
-  )) +
-  geom_text_wordcloud() +
-  theme_minimal() +
-  scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
+      label = word,
+      color = sentiment,
+      size = freq,
+      angle = angle
+    )) +
+    geom_text_wordcloud() +
+    theme_minimal() +
+    scale_color_gradient(low = "#FFD662FF", high = "#00539CFF")
   return(retPlot)
   
 }
@@ -444,9 +445,9 @@ election_0 <- youtube %>%
   filter(election_years == 0) %>%
   select(title)
 
-election_wc <- word_cloud_viz(election_1,1)
+election_wc <- word_cloud_viz(election_1, 1)
 
-nelection_wc <- word_cloud_viz(election_0,2)
+nelection_wc <- word_cloud_viz(election_0, 2)
 
 efinal <- election_wc +
   scale_radius(range = c(2, 15)) +
@@ -466,7 +467,7 @@ nefinal <- nelection_wc +
       Bluer for postive sentiment
       Brown for neutral sentiment
       Yellower for negative sentiment"
-  ) 
+  )
 
 efinal / nefinal
 ```
@@ -486,7 +487,7 @@ election_yr <- youtube %>%
     n
   )) * 100), "%", sep = ""))
 # Creating the plot
-elecyr <-election_yr %>%
+elecyr <- election_yr %>%
   ggplot(aes(y = name, x = n, fill = name)) +
   geom_col(show.legend = FALSE) +
   geom_text(aes(label = perc, color = name),
@@ -500,13 +501,17 @@ elecyr <-election_yr %>%
   ) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_minimal()+
-  scale_y_discrete(labels = rev(c("Use Sex",
-                              "Patriotic",
-                              "Funny",
-                              "Danger",
-                              "Celebrity",
-                              "Animals")))
+  theme_minimal() +
+  scale_y_discrete(labels = rev(
+    c(
+      "Use Sex",
+      "Patriotic",
+      "Funny",
+      "Danger",
+      "Celebrity",
+      "Animals"
+    )
+  ))
 ```
 
 ``` r
@@ -528,20 +533,22 @@ nelecyr <- no_election_yr %>%
   geom_text(aes(label = perc, color = name),
             nudge_x = 4,
             show.legend = FALSE) +
-  labs(
-    x = "Count",
-    y = "Ad Attribute",
-    subtitle = "In Non-Election Years"
-  ) +
+  labs(x = "Count",
+       y = "Ad Attribute",
+       subtitle = "In Non-Election Years") +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
   theme_minimal() +
-  scale_y_discrete(labels = rev(c("Use Sex",
-                              "Patriotic",
-                              "Funny",
-                              "Danger",
-                              "Celebrity",
-                              "Animals")))
+  scale_y_discrete(labels = rev(
+    c(
+      "Use Sex",
+      "Patriotic",
+      "Funny",
+      "Danger",
+      "Celebrity",
+      "Animals"
+    )
+  ))
 
 elecyr / nelecyr
 ```

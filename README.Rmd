@@ -67,7 +67,7 @@ of ads has changed over time. This is achieved by first counting the total numbe
 of `TRUE`-valued Boolean variable in each year and then determining of the total `TRUE`
 values how many come from each attribute. These are then grouped by year and
 plotted as a stacked area chart. We preferred this visualization over the 
-stacked bar chart with years on the y-axis since the stacked area chart makes it 
+stacked bar chart since the stacked area chart makes it 
 easier to identify the change, if any, in the trend of content proportions over 
 the years.  
 
