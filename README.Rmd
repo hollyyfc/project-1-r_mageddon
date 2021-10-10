@@ -19,24 +19,27 @@ library(tidytext)
 library(syuzhet)
 library(stringr)
 library(textdata)
-
 ```
 
 ```{r load-data, echo = FALSE, message=FALSE,warning=FALSE}
 # load data here
-youtube <- readr::read_csv('data/youtube.csv', show_col_types = FALSE)
+youtube <- readr::read_csv('data/youtube.csv', show_col_types = FALSE) 
+
 ```
 
 ## Introduction
 
 Our `youtube` dataset contains a list of ads from the 10 brands that had the most
 advertisements in Super Bowls from 2000 to 2020, according to data from 
-superbowl-ads.com, with matching videos found on YouTube. It was then analyzed 
-by FiveThirtyEight staffers to come up with seven defining characteristics of 
-a Super Bowl ad: `funny`, `danger`, `use_sex`, `show_product_quickly`, 
-`celebrity`, `patriotic`, `animals`, which are represented as boolean variables.
-Furthermore, we are also given the `view_count`, `like_count`, `dislike_count`,
-`favorite_count`, `comment_count`, `description`, and `title` for each ad. 
+superbowl-ads.com, with matching videos found on YouTube. These brands included 
+Toyota, Bud Light, Kia, Coca-Cola, Hynudai, Budweiser, Pepsi, NFL, Doritos, and E-trade
+It was then analyzed by the staff of FiveThirtyEight, an American website that 
+focuses on opinion poll analysis, politics, economics, and sports blogging, to 
+come up with seven defining characteristics of a Super Bowl ad: `funny`, `danger`, 
+`use_sex`, `show_product_quickly`, `celebrity`, `patriotic`, `animals`, which are 
+represented as boolean variables.Furthermore, we are also given the `view_count`, 
+`like_count`, `dislike_count`,`favorite_count`, `comment_count`, `description`, 
+and `title` for each ad. 
 
 
 
