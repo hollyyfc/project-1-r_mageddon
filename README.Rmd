@@ -366,7 +366,9 @@ of all the words being used (by size). Creating the word cloud involved cleaning
 text (for e.g turning all words lower, removing punctuation, removing numbers) which
 was done by the `tm` library. We also performed sentiment analysis on the words
 using the `get_sentiment()` function and colored the word cloud based on the
-words' sentiment score. 
+words' sentiment score. We used the `syuzhet` library for the `get_sentiment` function
+since it assigned each word a sentiment score and had the widest range of words that 
+could be assigned a score i.e largest word dictionary.
 
 To analyze the content aspect, we decided to opt for a column graph with percentage
 values of each content category as labels of the visualization. Possible alternative
@@ -386,51 +388,73 @@ youtube <- youtube %>%
 test <- youtube %>%
   filter(election_years == 1) %>%
   select(title)
-docs <- VCorpus(VectorSource(test))
-docs <- docs %>%
-  # Removing numbers
-  tm_map(removeNumbers) %>%
-  # Removing punctuation
-  tm_map(removePunctuation) %>%
-  # Removing whitespace
-  tm_map(stripWhitespace)
-docs <- tm_map(docs, content_transformer(tolower))
-docs <- tm_map(docs, removeWords, stopwords("english"))
-# Removing words that contain brand names
-docs <- tm_map(
-  docs,
-  removeWords,
-  c(
-    "super",
-    "bowl",
-    "commercial",
-    "superbowl",
-    "bud",
-    "light",
-    "budweiser",
-    "pepsi",
-    "hyundai",
-    "doritos",
-    "coke",
-    "cocacola",
-    "cola",
-    "coca",
-    "kia",
-    "toyota"
+
+text_cleaner <- function(testvector,freqCheck) {
+  docs <- VCorpus(VectorSource(testvector))
+  docs <- docs %>%
+    # Removing numbers
+    tm_map(removeNumbers) %>%
+    # Removing punctuation
+    tm_map(removePunctuation) %>%
+    # Removing whitespace
+    tm_map(stripWhitespace)
+  docs <- tm_map(docs, content_transformer(tolower))
+  docs <- tm_map(docs, removeWords, stopwords("english"))
+  # Removing words that contain brand names
+  docs <- tm_map(
+    docs,
+    removeWords,
+    c(
+      "super",
+      "bowl",
+      "commercial",
+      "superbowl",
+      "bud ",
+      "light",
+      "budweiser",
+      "pepsi",
+      "hyundai",
+      "doritos",
+      "coke",
+      "cocacola",
+      "cola",
+      "coca",
+      "kia",
+      "toyota",
+      "etrade",
+      "nfl"
+    )
   )
-)
-dtm <- TermDocumentMatrix(docs)
-matrix <- as.matrix(dtm)
-words <- sort(rowSums(matrix), decreasing = TRUE)
-election_df <- data.frame(word = names(words), freq = words)
-election_df <- election_df %>%
-  mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
-  # Package to get sentiment scores for each word in the dataset
-  mutate(sentiment = get_sentiment(word, "syuzhet"))
+  dtm <- TermDocumentMatrix(docs)
+  matrix <- as.matrix(dtm)
+  words <- sort(rowSums(matrix), decreasing = TRUE)
+  election_df <- data.frame(word = names(words), freq = words)
+  election_df <- election_df %>%
+    mutate(angle = sample(-45:45, nrow(election_df), replace = TRUE)) %>%
+      filter(freq >= freqCheck) %>%
+    # Package to get sentiment scores for each word in the dataset
+    mutate(sentiment = get_sentiment(word, "syuzhet"))
+  return(election_df)
+  
+}
+
 ```
 
 ``` {r election-wordcloud-viz}
-election_df %>%
+
+election_1 <- youtube %>%
+  filter(election_years == 1) %>%
+  select(title)
+
+election_0 <- youtube %>%
+  filter(election_years == 0) %>%
+  select(title)
+
+election_wc <- text_cleaner(election_1,1)
+
+nelection_wc <- text_cleaner(election_0,2)
+
+election_wc %>%
   ggplot(aes(
     label = word,
     color = sentiment,
@@ -444,66 +468,12 @@ election_df %>%
   labs(
     title = "Election Year Ad Title Word Cloud",
     subtitle = "Colored by Sentiment
-      Bluer for postive sentiments
+      Bluer for postive sentiment
+      Brown for neutral sentiment
       Yellower for negative sentiment"
   )
-```
 
-```{r non-election-wordcloud-data-prep}
-# Isolating the title variable
-no_election_title <- youtube %>%
-  filter(election_years == 0) %>%
-  select(title)
-# Data Wrangling steps
-docs <- VCorpus(VectorSource(no_election_title))
-docs <- docs %>%
-  # Removing numbers
-  tm_map(removeNumbers) %>%
-  # Removing punctuation
-  tm_map(removePunctuation) %>%
-  # Removing whitespace
-  tm_map(stripWhitespace)
-# transforming words to lowercase
-docs <- tm_map(docs, content_transformer(tolower))
-# removing words that contain brand names
-docs <- tm_map(
-  docs,
-  removeWords,
-  c(
-    "super",
-    "bowl",
-    "commercial",
-    "superbowl",
-    "bud",
-    "light",
-    "budweiser",
-    "pepsi",
-    "hyundai",
-    "doritos",
-    "coke",
-    "cocacola",
-    "cola",
-    "coca",
-    "the",
-    "kia",
-    "toyota"
-  )
-)
-# Creating df that can be used by ggwordcloud
-dtm <- TermDocumentMatrix(docs)
-matrix <- as.matrix(dtm)
-words <- sort(rowSums(matrix), decreasing = TRUE)
-non_election_df <- data.frame(word = names(words), freq = words)
-# Adding the sentiment score variable
-non_election_df <- non_election_df %>%
-  mutate(angle = sample(-45:45, nrow(non_election_df), replace = TRUE)) %>%
-  filter(freq >= 2) %>%
-  mutate(sentiment = get_sentiment(word, "syuzhet"))
-```
-
-
-``` {r non-election-wordcloud-viz}
-non_election_df %>%
+nelection_wc %>%
   ggplot(aes(
     label = word,
     color = sentiment,
@@ -517,12 +487,12 @@ non_election_df %>%
   labs(
     title = "Non-election Year Ad Title Word Cloud",
     subtitle = "Colored by Sentiment
-      Bluer for postive sentiments
+      Bluer for postive sentiment
+      Brown for neutral sentiment
       Yellower for negative sentiment"
   ) 
+
 ```
-
-
 
 
 ``` {r election-col-plot}
