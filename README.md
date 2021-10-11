@@ -4,18 +4,28 @@ commercials
 
 ## Introduction
 
-Our `youtube` dataset contains a list of ads from the 10 brands that had
-the most advertisements in Super Bowls from 2000 to 2020, according to
-data from superbowl-ads.com, with matching videos found on YouTube.
-These brands included Toyota, Bud Light, Kia, Coca-Cola, Hynudai,
-Budweiser, Pepsi, NFL, Doritos, and E-trade. It was then analyzed by the
-staff of FiveThirtyEight, an American website that focuses on opinion
-poll analysis, politics, economics, and sports blogging, to come up with
-seven defining characteristics of a Super Bowl ad: `funny`, `danger`,
-`use_sex`, `show_product_quickly`, `celebrity`, `patriotic`, `animals`,
-which are represented as boolean variables. Furthermore, we are also
-given the `view_count`, `like_count`, `dislike_count`,`favorite_count`,
-`comment_count`, `description`, and `title` for each ad.
+The Super Bowl has top television ratings in the US, and its commercials
+are widely watched by US audiences. Thanks to the “like”, “dislike”, and
+“comment” features of Youtube, we are able to examine the interaction
+between the audience and the TV ads that were posted on Youtube. This
+motivated our team to explore the trends in how the content and audience
+preferences of Super Bowl ads change over the years, as well as how
+their content and description differ during the election and
+non-election years.
+
+Our `youtube` dataset was analyzed by FiveThirtyEight, a website that
+focuses on opinion poll analysis, politics, economics, and sports
+blogging. The dataset contains a list of ads with matching videos found
+on YouTube from the 10 brands that had the most advertisements in Super
+Bowls from 2000 to 2020, according to superbowl-ads.com. The 10 brands
+are Toyota, Bud Light, Hynudai, Coca-Cola, Kia, Budweiser, NFL, Pepsi,
+Doritos, and E-Trade. We mainly focus on 7 defining characteristics of
+each Super Bowl ad: `funny`, `danger`, `use_sex`,
+`show_product_quickly`, `celebrity`, `patriotic`, `animals`, which are
+represented as boolean variables. We will also use metrics like
+`view_count`, `like_count`, `dislike_count`, `favorite_count`,
+`comment_count`, `description`, and `title` of each ad to drive our
+analysis.
 
 ## Question 1：What is the trend of the ads’ content and audience preferences over the years?
 
@@ -23,37 +33,43 @@ given the `view_count`, `like_count`, `dislike_count`,`favorite_count`,
 
 Many things have changed in the first 20 years of the 21st century.
 There are life science breakthroughs, political conflicts, feminist
-movements, etc. Therefore, we want to see if people’s reaction to Super
+movements, etc. Therefore, we want to see if people’s reactions to Super
 Bowl commercials reflect the changes in their lifestyles and thoughts
 over the years. The changes in the ads themselves may also tell how
 companies are reacting to audience preferences.
 
 We want to explore the trends in how the ads change over the years in
-terms of content, audience preferences, and engagement. To analyze the
-change in content we use the logical variables
+terms of content and audience preferences. To analyze the change in the
+content we use the logical variables
 `funny`,`danger`,`use_sex`,`patriotic`, `show_product_quickly`,
 `celebrity`, and `animals`. To explore audience preference and
-engagement,`like_count`, `comment_count`, and `view_count` are used to
-calculate ratio of like/engagement over total views.
+engagement,`like_count` and `view_count` are used to calculate the ratio
+of like over total views.
 
 ### Approach
 
-For the first plot, we used a stacked area chart to see how the
-attribute makeup of ads has changed over time. This is achieved by first
-counting the total number of `TRUE`-valued Boolean variable in each year
-and then determining of the total `TRUE` values how many come from each
-attribute. These are then grouped by year and plotted as a stacked area
+For the first plot, we used a stacked area chart to see the percentage
+makeup of video attributes from 2000 to 2020. In order to compute the
+percentage, we first count the total number of `TRUE` values for each
+attribute in a year and then divide it over the total number of `TRUE`
+values in that year. The percentage adds up to one as we are not
+dividing over the total number of rows. The percentages we get using the
+above method are then grouped by year and plotted as a stacked area
 chart. We preferred this visualization over the stacked bar chart since
 the stacked area chart makes it easier to identify the change, if any,
 in the trend of content proportions over the years.
 
-For the second plot, we used a line graphs faceted by `attribute`, a
+For the second plot, we used line graphs faceted by `attribute`, a
 variable that is created using all logical variables in the data set.
 The faceted line graph is suitable for time-dependent changes by each
-categorical variable. Because the logical variables are either true or
-false, 2 different lines in each sub-plot clearly show how the trends
-(audience preference in this case) differ if an ad contains an attribute
-or not.
+`attribute`. We would like to see whether containing a certain
+`attribute` impacts audience preference for an ad in each year. In each
+year, all ads are divided into 2 groups: having a certain `attribute` or
+not. In each group, The sum of the ratio of “likes” over “views” is
+divided over the total number of ads in that group to achieve the
+average ratio of “likes” over “views”. Therefore, the 2 lines in each
+sub-plot clearly show how the trend of audience preference differs if an
+ad contains an attribute or not over the years.
 
 ### Analysis
 
@@ -123,8 +139,7 @@ ggplot(all_year_plot,
     x = "Year",
     y = "Percentage",
     fill = "Attributes",
-    title = "Percentage comparison among commercial attributes in\nSuperbowl 
-    commercials over years (2000~2020)",
+    title = "Percentage comparison among commercial attributes in\nSuperbowl commercials over years (2000~2020)",
     subtitle = "By attributes"
   ) +
   scale_fill_brewer(palette = "Dark2") 

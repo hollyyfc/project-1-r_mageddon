@@ -157,8 +157,7 @@ ggplot(all_year_plot,
     x = "Year",
     y = "Percentage",
     fill = "Attributes",
-    title = "Percentage comparison among commercial attributes in\nSuperbowl 
-    commercials over years (2000~2020)",
+    title = "Percentage comparison among commercial attributes in\nSuperbowl commercials over years (2000~2020)",
     subtitle = "By attributes"
   ) +
   scale_fill_brewer(palette = "Dark2") 
