@@ -67,25 +67,27 @@ used to calculate the ratio of like/engagement over total views.
 
 ### Approach
 
-For the first plot, we used a stacked area chart to see how the attribute makeup
-of ads has changed over time. This is achieved by first counting the total number 
-of `TRUE`-valued Boolean variable in each year and then determining of the total `TRUE`
-values how many come from each attribute. These are then grouped by year and
-plotted as a stacked area chart. We preferred this visualization over the 
-stacked bar chart since the stacked area chart makes it 
-easier to identify the change, if any, in the trend of content proportions over 
-the years.  
+For the first plot, we used a stacked area chart to see the percentage makeup of
+video attributes from 2000 to 2020. In order to compute the percentage, we first
+count the total number of `TRUE` values for each attribute in a year and then 
+divide it over the total number of `TRUE` values in that year. The percentage adds
+up to one as we are not dividing over the total number of rows. The percentages 
+we get using the above method are then grouped by year and plotted as a stacked 
+area chart. We preferred this visualization over the stacked bar chart since the
+stacked area chart makes it easier to identify the change, if any, in the trend 
+of content proportions over the years.  
 
-For the second plot, we used line graphs faceted by `attribute`, a variable that 
-is created using all logical variables in the data set. The faceted line graph is
-suitable for time-dependent changes by each `attribute`. We would like to see 
+
+For the second plot, we used line graphs faceted by `attribute`, a variable that
+is created using all logical variables in the data set. The faceted line graph 
+is suitable for time-dependent changes by each `attribute`. We would like to see
 whether containing a certain `attribute` impacts audience preference for an ad in
-each year. In each year, all ads are divided into 2 groups: having a certain 
-`attribute` or not. In each group, The sum of the ratio of “likes” over “views” 
-is divided over the total number of ads in that group to achieve the average ratio
-of “likes” over “views”. Therefore, the 2 lines in each sub-plot clearly show how
-the trend of audience preference differs if an ad contains an attribute or not 
-over the years.
+each year. In each year, all ads are divided into 2 groups: having a certain `
+attribute` or not. In each group, The sum of the ratio of “likes” over “views” is
+divided over the total number of ads in that group to achieve the average ratio of
+“likes” over “views”. Therefore, the 2 lines in each sub-plot clearly show how the
+trend of audience preference differs if an ad contains an attribute or not over the
+years.
 
 
 
