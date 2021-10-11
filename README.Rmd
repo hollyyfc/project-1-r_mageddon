@@ -346,8 +346,9 @@ could be assigned a score i.e largest word dictionary.
 To analyze the content aspect, we decided to opt for a column graph with percentage
 values of each content category as labels of the visualization. Possible alternative
 that we considered was a pie chart but since our column graph shows the percentage
-values as well as count values, we decided to go for the visualziation that 
-maximized information. 
+values as well as count values, we decided to go for the visualization that 
+maximized information. For this plot, we decided to not use the `show_product_quickly`
+attribute since it does not provide insight into whether the content was different.
 
 ### Analysis
 
