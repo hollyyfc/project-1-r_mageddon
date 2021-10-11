@@ -271,40 +271,18 @@ ggplot(all_compare, aes(x = as.numeric(year), y = mean_like)) +
 
 ### Discussion
 
-Looking at the width of each color band, we can see that over the years, `funny` 
-and `show_product_quickly` take up the highest proportion among the seven video 
-attributes. However, both of them are showing a decreasing trend when it's around
-2020. In fact, other attributes, such as `patriotic` and `use_sex`, experiencing 
-decreases recently. And `celebrity` is, nevertheless, having an increasing 
-relative proportion. attribute `patriotic` takes up the least proportion overall,
-but it reaches its peak proportion around 2017. 
+Looking at the stacked area chart, we can get an overview of the video attributes makeup. In general, `funny` and `show_product_quickly` take up the highest proportion 
+among the seven video attributes over years. `patriotic` takes up the least proportion. We cannot generalize a clear pattern just by using the stacked area chart since the width of each color band is hard to measure and compare. However, this chart does give us information about what are the most preferred attributes of Superbowl commercials: showing products quickly and being funny. This makes sense since Super Bowl commercials are usually expected to be humorous, and showing the product quickly increases the company’s chances of maximizing consumer exposure to their product, which is why these attributes are the most prominent across the years. 
 
-For line plots, we first look at audience preference of various attributes in ads. 
-From 2000 to 2020, the ads that contain dangerous elements are getting more likes 
-than ads that do not contain dangerous elements. There is no obvious trend that 
-the audience strongly prefer a specific attribute other than `danger` over the 
-years.In certain years, audience feel strongly about ads that contain specific 
-attributes. In 2010, ads that contain `animals` element are liked more than 3 
-times compared to ads that do not contain animals. Same observation is shown 
-for ads containing `patriotic` element in 2010. However, from 2017 to 2020, 
-ads that contain `patriotic` content become less liked. Ads that use sexuality 
-are far more liked in 2004 but are less liked in 2015. In 2002, the ads that 
-have no humorous element are liked almost 3 times as ads that have humorous 
-element. 
+Over the years, the trend of audience preference toward Super Bowl ads depends on the attributes the ads contain. For example, the audience’s love for `patriotic` ads peaked in 2010. 2010 was the year of the first midterm election after Obama’s victory, which might explain this increase. Furthermore, in specific years, the audience has strong feelings toward ads that contain certain attributes. For instance, in 2002, ads that do not contain `funny` received higher percentage of likes than the ones that contain `funny`. In this case, it is possible that the terrorist attack in 2001 had changed the national sentiment, so the audience consider funny videos less appropriate during that time.
 
-Then, we look at what kinds of ads elicit the audience to engage by commenting.
-In general, the engagement rate is pretty low. However, in 2004 specifically there 
-is are significant differences between engagement rate for all attributes. Ads that
-contain `animal`, `funny`, show product quickly, or use sexuality shows higher 
-engagement compared the ads that don't contain these attributes. On the other hand, 
-ads that don't contain `celebrity`, `patriotic`, or `danger` tend to have higher
-engagement rates.
 
-The year variable used here denotes the Superbowl year where the commercial was 
-shown. However, some commercials have a different published date on Youtube.
-Furthermore, the youtube videos have been collected from random Youtube users 
-instead of influencers or official commercial accounts. Therefore, the views, likes,
-and engagement also depend on the account itself.
+Combining the line graphs with the stacked area plot, we discover interesting matches and unmatches between attributes proportion and audience reactions. For example, a corresponding match appears in attribute `celebrity` where celebrity-included ads have become popular with higher percentage since 2015, which coincides with the increasing audience preference by observing the interaction data in plot two. However, things are not always matched. When the proportion of `funny` videos grew from 2000 to 2003, audiences tend to prefer videos that do not contain humor. Similarly, `danger` in the last 5 
+years has narrowed its width in the stacked area chart while the audience tends to 
+hit like more often for ads containing danger. There can be many underlying 
+reasons, but our guesses reside in the different expectations between the audience 
+and ad companies in which relevant regulations prevent companies from catering to their audience on dangerous content.
+
 
 
 
