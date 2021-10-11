@@ -56,11 +56,11 @@ the changes in their lifestyles and thoughts over the years. The changes in the
 ads themselves may also tell how companies are reacting to audience preferences.
 
 We want to explore the trends in how the ads change over the years in terms of 
-content, audience preferences, and engagement. To analyze the change in the content 
+content and audience preferences. To analyze the change in the content 
 we use the logical variables `funny`,` danger`,`use_sex`,`patriotic`,
 `show_product_quickly`, `celebrity`, and `animals`. To explore audience 
-preference and engagement,`like_count`, `comment_count`, and `view_count` are 
-used to calculate the ratio of like/engagement over total views.
+preference and engagement,`like_count` and `view_count` are used to calculate 
+the ratio of like over total views.
 
 
 
