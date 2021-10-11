@@ -51,16 +51,17 @@ like `view_count`, `like_count`, `dislike_count`, `favorite_count`, `comment_cou
 ### Introduction
 Many things have changed in the first 20 years of the 21st century. There are 
 life science breakthroughs, political conflicts, feminist movements, etc. 
-Therefore, we want to see if people’s reaction to Super Bowl commercials reflect 
+Therefore, we want to see if people’s reactions to Super Bowl commercials reflect 
 the changes in their lifestyles and thoughts over the years. The changes in the 
 ads themselves may also tell how companies are reacting to audience preferences.
 
 We want to explore the trends in how the ads change over the years in terms of 
-content, audience preferences, and engagement. To analyze the change in content 
-we use the logical variables `funny`,`danger`,`use_sex`,`patriotic`,
+content, audience preferences, and engagement. To analyze the change in the content 
+we use the logical variables `funny`,` danger`,`use_sex`,`patriotic`,
 `show_product_quickly`, `celebrity`, and `animals`. To explore audience 
 preference and engagement,`like_count`, `comment_count`, and `view_count` are 
-used to calculate ratio of like/engagement over total views.
+used to calculate the ratio of like/engagement over total views.
+
 
 
 
