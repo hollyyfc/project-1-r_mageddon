@@ -26,17 +26,23 @@ youtube <-
 
 ## Introduction
 
-Our `youtube` dataset contains a list of ads from the 10 brands that had the most
-advertisements in Super Bowls from 2000 to 2020, according to data from 
-superbowl-ads.com, with matching videos found on YouTube. These brands included 
-Toyota, Bud Light, Kia, Coca-Cola, Hynudai, Budweiser, Pepsi, NFL, Doritos, and E-trade.
-It was then analyzed by the staff of FiveThirtyEight, an American website that 
-focuses on opinion poll analysis, politics, economics, and sports blogging, to 
-come up with seven defining characteristics of a Super Bowl ad: `funny`, `danger`, 
-`use_sex`, `show_product_quickly`, `celebrity`, `patriotic`, `animals`, which are 
-represented as boolean variables. Furthermore, we are also given the `view_count`, 
-`like_count`, `dislike_count`,`favorite_count`, `comment_count`, `description`, 
-and `title` for each ad. 
+The Super Bowl has top television ratings in the US, and its commercials are widely
+watched by US audiences. Thanks to the “like”, “dislike”, and “comment” features of 
+Youtube, we are able to examine the interaction between the audience and the TV ads
+that were posted on Youtube. This motivated our team to explore the trends in how 
+the content and audience preferences of Super Bowl ads change over the years, as 
+well as how their content and description differ during the election and non-election
+years. 
+
+Our `youtube` dataset was analyzed by FiveThirtyEight, a website that focuses on 
+opinion poll analysis, politics, economics, and sports blogging. The dataset contains
+a list of ads with matching videos found on YouTube from the 10 brands that had the 
+most advertisements in Super Bowls from 2000 to 2020, according to superbowl-ads.com.
+The 10 brands are Toyota, Bud Light, Hynudai, Coca-Cola, Kia, Budweiser, NFL, Pepsi,
+Doritos, and E-Trade. We mainly focus on 7 defining characteristics of each Super 
+Bowl ad: `funny`, `danger`, `use_sex`, `show_product_quickly`, `celebrity`, `patriotic`,
+`animals`, which are represented as boolean variables. We will also use metrics 
+like `view_count`, `like_count`, `dislike_count`, `favorite_count`, `comment_count`, `description`, and `title` of each ad to drive our analysis.
 
 
 
